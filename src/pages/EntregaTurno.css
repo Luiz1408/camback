@@ -207,7 +207,50 @@ body {
   line-height: 1.2;
 }
 
-/* Notas y asignaciones */
+/* Notas y asignaciones - Grid horizontal */
+.turno-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Responsive - 1 columna en móviles */
+@media (max-width: 768px) {
+  .turno-notes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive - 2 columnas en tablets */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive - 2 columnas en desktop grande */
+@media (min-width: 1201px) and (max-width: 1400px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive - 3 columnas en pantallas extra grandes */
+@media (min-width: 1401px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Responsive - 4 columnas en pantallas ultra anchas */
+@media (min-width: 1600px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mantener el contenedor antiguo por compatibilidad */
 .turno-notes-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -401,6 +444,10 @@ body {
 
 .turno-note-card.pendiente {
   border-left: 4px solid var(--turno-warning);
+  grid-column: 1 / -1; /* Ocupa desde la primera hasta la última columna */
+  width: 100%; /* Ancho completo del grid */
+  min-height: 280px; /* Altura mínima reducida */
+  max-height: 320px; /* Altura máxima para que no crezcan demasiado */
 }
 
 .turno-note-card.en-proceso {
@@ -409,15 +456,79 @@ body {
 
 .turno-note-card.completado {
   border-left: 4px solid var(--turno-success);
-  opacity: 0.8;
+  opacity: 0.9; /* Un poco más visible para mantener el diseño */
+  grid-column: 1 / -1; /* Ocupa desde la primera hasta la última columna */
+  width: 100%; /* Ancho completo del grid */
+  min-height: 280px; /* Altura mínima reducida */
+  max-height: 320px; /* Altura máxima para que no crezcan demasiado */
 }
 
 .turno-note-card.cancelado {
   border-left: 4px solid var(--turno-danger);
-  opacity: 0.7;
+  opacity: 0.8; /* Un poco más visible para mantener el diseño */
+  grid-column: 1 / -1; /* Ocupa desde la primera hasta la última columna */
+  width: 100%; /* Ancho completo del grid */
+  min-height: 280px; /* Altura mínima reducida */
+  max-height: 320px; /* Altura máxima para que no crezcan demasiado */
 }
 
-/* Acknowledgments section */
+/* Asegurar que las notas finalizadas mantengan el mismo diseño que las activas */
+.turno-note-card.completado .turno-note-content,
+.turno-note-card.cancelado .turno-note-content {
+  opacity: 1; /* Contenido completamente legible */
+}
+
+.turno-note-card.completado .turno-note-content textarea,
+.turno-note-card.cancelado .turno-note-content textarea {
+  min-height: 60px; /* Altura reducida del textarea */
+  max-height: 80px; /* Altura máxima del textarea */
+  width: 100%; /* Ancho completo */
+  max-width: 100%; /* Máximo ancho */
+  padding: 0.75rem; /* Padding cómodo */
+  font-size: 0.9rem; /* Texto un poco más grande */
+  line-height: 1.4; /* Espaciado de línea */
+}
+
+.turno-note-card.completado .turno-acknowledgments-grid,
+.turno-note-card.cancelado .turno-acknowledgments-grid {
+  opacity: 1; /* Acknowledgments completamente visibles */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Coordinadores más compactos */
+  gap: 0.5rem; /* Reducir espacio entre coordinadores */
+}
+
+.turno-note-card.completado .turno-acknowledgment-item,
+.turno-note-card.cancelado .turno-acknowledgment-item {
+  padding: 0.25rem; /* Reducir padding */
+  font-size: 0.8rem; /* Texto un poco más pequeño */
+}
+
+/* Ajustar el contenido dentro de las tarjetas pendientes */
+.turno-note-card.pendiente .turno-note-content {
+  margin-bottom: 0.5rem; /* Reducir espacio inferior */
+}
+
+.turno-note-card.pendiente .turno-note-content textarea {
+  min-height: 60px; /* Altura reducida del textarea */
+  max-height: 80px; /* Altura máxima del textarea */
+  width: 100%; /* Ancho completo */
+  max-width: 100%; /* Máximo ancho */
+  padding: 0.75rem; /* Padding cómodo */
+  font-size: 0.9rem; /* Texto un poco más grande */
+  line-height: 1.4; /* Espaciado de línea */
+}
+
+.turno-note-card.pendiente .turno-acknowledgments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Coordinadores más compactos */
+  gap: 0.5rem; /* Reducir espacio entre coordinadores */
+}
+
+.turno-note-card.pendiente .turno-acknowledgment-item {
+  padding: 0.25rem; /* Reducir padding */
+  font-size: 0.8rem; /* Texto un poco más pequeño */
+}
+
 .turno-acknowledgments {
   border-top: 1px solid var(--turno-border);
   padding-top: 1rem;
@@ -481,22 +592,196 @@ body {
   white-space: nowrap;
 }
 
-/* Responsive */
+/* Información de finalización */
+.turno-finalization-info {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid var(--turno-success);
+}
+
+.turno-note-card.cancelado .turno-finalization-info {
+  border-left-color: var(--turno-danger);
+  background-color: #fef2f2;
+}
+
+.turno-finalization-text {
+  font-size: 0.75rem;
+  color: var(--turno-text);
+  font-weight: 500;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Responsive - Mejorado para todo el aplicativo */
+@media (max-width: 480px) {
+  /* Móviles muy pequeños */
+  .turno-container {
+    padding: 0.5rem;
+  }
+  
+  .turno-title {
+    font-size: 1.25rem;
+  }
+  
+  .turno-note-card {
+    padding: 0.75rem;
+  }
+  
+  .turno-form-select,
+  .turno-form-input,
+  .turno-form-textarea {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .turno-acknowledgment-item {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .btn-turno {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
 @media (max-width: 768px) {
   .turno-container {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .turno-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .turno-title {
+    font-size: 1.5rem;
   }
   
   .turno-form-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
   
-  .turno-notes-container {
+  .turno-notes-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .turno-note-card {
+    padding: 1rem;
+  }
+  
+  .turno-note-card.pendiente,
+  .turno-note-card.completado,
+  .turno-note-card.cancelado {
+    min-height: auto;
+    max-height: none;
+    grid-column: 1; /* Una columna en móviles */
+  }
+  
+  .turno-note-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .turno-note-content textarea {
+    min-height: 80px;
+    max-height: 120px;
+  }
+  
+  .turno-note-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .turno-acknowledgments-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .turno-acknowledgment-item {
+    padding: 0.75rem;
+  }
+  
+  .turno-tabs {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .turno-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-turno {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-turno--sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .turno-form-select,
+  .turno-form-input,
+  .turno-form-textarea {
+    font-size: 0.875rem;
+  }
+}
+
+/* Tablets - Responsive intermedio */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .turno-container {
+    padding: 1.5rem;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .turno-note-card.pendiente,
+  .turno-note-card.completado,
+  .turno-note-card.cancelado {
+    grid-column: 1 / -1; /* Sigue ocupando ancho completo */
+  }
+  
+  .turno-acknowledgments-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop grande - Optimizaciones */
+@media (min-width: 1401px) {
+  .turno-container {
+    padding: 2rem;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+  
+  .turno-acknowledgments-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* Pantallas ultra anchas */
+@media (min-width: 1600px) {
+  .turno-container {
+    max-width: 1600px;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
