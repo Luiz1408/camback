@@ -16,6 +16,7 @@ namespace ExcelProcessorApi.Data
         public DbSet<ShiftHandOffNote> ShiftHandOffNotes { get; set; }
         public DbSet<ShiftHandOffAcknowledgement> ShiftHandOffAcknowledgements { get; set; }
         public DbSet<TechnicalActivity> TechnicalActivities { get; set; }
+        public DbSet<TechnicalActivityImage> TechnicalActivityImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -251,6 +252,46 @@ namespace ExcelProcessorApi.Data
                 entity.HasOne(a => a.UpdatedByUser)
                     .WithMany()
                     .HasForeignKey(a => a.UpdatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<TechnicalActivityImage>(entity =>
+            {
+                entity.Property(i => i.Type)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(i => i.FileName)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(i => i.OriginalFileName)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(i => i.FileExtension)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                entity.Property(i => i.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(i => i.Url)
+                    .IsRequired()
+                    .HasMaxLength(2000);
+
+                entity.Property(i => i.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.HasOne(i => i.TechnicalActivity)
+                    .WithMany(a => a.Images)
+                    .HasForeignKey(i => i.TechnicalActivityId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(i => i.CreatedByUser)
+                    .WithMany()
+                    .HasForeignKey(i => i.CreatedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 

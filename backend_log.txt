@@ -1,0 +1,84 @@
+[2025-11-28 12:40:07] === INICIO UpdateActivityImages ===
+Activity ID: 11
+FormData keys: [existingAntesImages, existingDespuesImages]
+Files count: 1
+Files: [antesImages (18841 bytes)]
+[2025-11-28 12:40:07] Imágenes existentes:
+existingAntesImagesJson: []
+existingDespuesImagesJson: []
+[2025-11-28 12:40:07] Imágenes finales:
+Total imágenes: 1
+  - 19 (antes): 11_antes_20251128184007_a6a956ca2de44b8f8161b2d78de7bc8c.jpeg
+=== FIN UpdateActivityImages - ÉXITO ===
+
+[2025-11-28 12:40:17] === INICIO UpdateActivityImages ===
+Activity ID: 11
+FormData keys: [existingAntesImages, existingDespuesImages]
+Files count: 1
+Files: [despuesImages (136085 bytes)]
+[2025-11-28 12:40:18] Imágenes existentes:
+existingAntesImagesJson: [{"id":19,"type":"antes","fileName":"11_antes_20251128184007_a6a956ca2de44b8f8161b2d78de7bc8c.jpeg","originalFileName":"WhatsApp Image 2025-11-27 at 11.19.09 AM.jpeg","fileExtension":".jpeg","fileSize":18841,"url":"/uploads/technical-activities/11_antes_20251128184007_a6a956ca2de44b8f8161b2d78de7bc8c.jpeg","createdAt":"2025-11-28T18:40:07.3450518"}]
+existingDespuesImagesJson: []
+[2025-11-28 12:40:18] Imágenes finales:
+Total imágenes: 1
+  - 20 (despues): 11_despues_20251128184018_55ed02c8f4e547a5835849a12e8a540f.jpg
+=== FIN UpdateActivityImages - ÉXITO ===
+
+[2025-11-28 12:46:00] === INICIO UpdateActivityImages ===
+Activity ID: 12
+FormData keys: [existingAntesImages, existingDespuesImages]
+Files count: 1
+Files: [antesImages (18841 bytes)]
+[2025-11-28 12:46:00] Imágenes existentes:
+existingAntesImagesJson: []
+existingDespuesImagesJson: []
+[2025-11-28 12:46:00] Imágenes finales:
+Total imágenes: 1
+  - 21 (antes): 12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg
+=== FIN UpdateActivityImages - ÉXITO ===
+
+[2025-11-28 12:46:13] === INICIO UpdateActivityImages ===
+Activity ID: 12
+FormData keys: [existingAntesImages, existingDespuesImages]
+Files count: 1
+Files: [despuesImages (136085 bytes)]
+[2025-11-28 12:46:13] Imágenes existentes:
+existingAntesImagesJson: [{"id":21,"type":"antes","fileName":"12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg","originalFileName":"WhatsApp Image 2025-11-27 at 11.19.09 AM.jpeg","fileExtension":".jpeg","fileSize":18841,"url":"/uploads/technical-activities/12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg","createdAt":"2025-11-28T18:46:00.4962212"}]
+existingDespuesImagesJson: []
+[2025-11-28 12:46:13] Imágenes finales:
+Total imágenes: 2
+  - 21 (antes): 12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg
+  - 22 (despues): 12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg
+=== FIN UpdateActivityImages - ÉXITO ===
+
+[2025-11-28 12:58:54] === INICIO UpdateActivityImages ===
+Activity ID: 12
+FormData keys: [existingAntesImages, existingDespuesImages]
+Files count: 1
+Files: [antesImages (400693 bytes)]
+[2025-11-28 12:58:54] Imágenes existentes:
+existingAntesImagesJson: [{"id":21,"type":"antes","fileName":"12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg","originalFileName":"WhatsApp Image 2025-11-27 at 11.19.09 AM.jpeg","fileExtension":".jpeg","fileSize":18841,"url":"/uploads/technical-activities/12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg","createdAt":"2025-11-28T18:46:00.4962212"}]
+existingDespuesImagesJson: [{"id":22,"type":"despues","fileName":"12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg","originalFileName":"HDA noche.jpg","fileExtension":".jpg","fileSize":136085,"url":"/uploads/technical-activities/12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg","createdAt":"2025-11-28T18:46:13.6920385"}]
+[2025-11-28 12:58:54] Imágenes finales:
+Total imágenes: 3
+  - 21 (antes): 12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg
+  - 22 (despues): 12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg
+  - 23 (antes): 12_antes_20251128185854_4f348146c3664d219ac145ff186f6d13.png
+=== FIN UpdateActivityImages - ÉXITO ===
+
+[2025-11-28 12:59:05] === INICIO UpdateActivityImages ===
+Activity ID: 12
+FormData keys: [existingAntesImages, existingDespuesImages]
+Files count: 1
+Files: [despuesImages (400693 bytes)]
+[2025-11-28 12:59:05] Imágenes existentes:
+existingAntesImagesJson: [{"id":21,"type":"antes","fileName":"12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg","originalFileName":"WhatsApp Image 2025-11-27 at 11.19.09 AM.jpeg","fileExtension":".jpeg","fileSize":18841,"url":"/uploads/technical-activities/12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg","createdAt":"2025-11-28T18:46:00.4962212"},{"id":23,"type":"antes","fileName":"12_antes_20251128185854_4f348146c3664d219ac145ff186f6d13.png","originalFileName":"CALENDARIO TOLTECA.png","fileExtension":".png","fileSize":400693,"url":"/uploads/technical-activities/12_antes_20251128185854_4f348146c3664d219ac145ff186f6d13.png","createdAt":"2025-11-28T18:58:54.743442"}]
+existingDespuesImagesJson: [{"id":22,"type":"despues","fileName":"12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg","originalFileName":"HDA noche.jpg","fileExtension":".jpg","fileSize":136085,"url":"/uploads/technical-activities/12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg","createdAt":"2025-11-28T18:46:13.6920385"}]
+[2025-11-28 12:59:05] Imágenes finales:
+Total imágenes: 4
+  - 21 (antes): 12_antes_20251128184600_562c9e2820dd4aa99fd7bc3cca55c734.jpeg
+  - 22 (despues): 12_despues_20251128184613_15082f3120814712867235fa41574b99.jpg
+  - 23 (antes): 12_antes_20251128185854_4f348146c3664d219ac145ff186f6d13.png
+  - 24 (despues): 12_despues_20251128185905_a6edac037efb400ca2d2179eba91b913.png
+=== FIN UpdateActivityImages - ÉXITO ===
+

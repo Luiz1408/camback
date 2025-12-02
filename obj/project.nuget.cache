@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "X8wPxhI93Hg=",
+  "dgSpecHash": "855T44UjPao=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Fernando\\ExcelProcessorApi\\ExcelProcessorApi.csproj",
+  "projectFilePath": "C:\\Users\\Fernando\\Truper_CAM_new\\ExcelProcessorApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Fernando\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Fernando\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

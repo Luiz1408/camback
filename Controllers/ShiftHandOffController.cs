@@ -76,9 +76,11 @@ namespace ExcelProcessorApi.Controllers
 
             var note = new ShiftHandOffNote
             {
+                Title = dto.Title?.Trim() ?? string.Empty,
                 Description = dto.Description?.Trim() ?? string.Empty,
                 Status = string.IsNullOrWhiteSpace(dto.Status) ? "Pendiente" : dto.Status.Trim(),
                 Type = string.IsNullOrWhiteSpace(dto.Type) ? "informativo" : dto.Type.Trim(),
+                Priority = string.IsNullOrWhiteSpace(dto.Priority) ? "Media" : dto.Priority.Trim(),
                 AssignedCoordinatorId = dto.AssignedCoordinatorId,
                 CreatedByUserId = currentUser.Id,
                 CreatedAt = DateTime.UtcNow,
@@ -126,17 +128,20 @@ namespace ExcelProcessorApi.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = RoleNames.Administrator + "," + RoleNames.Coordinator)]
-        public async Task<IActionResult> UpdateNote(int id, [FromBody] UpsertShiftHandOffNoteDto dto)
+        public async Task<IActionResult> UpdateNote(int id, [FromBody] UpdateShiftHandOffNoteDto dto)
         {
             Console.WriteLine($"=== DEBUG BACKEND UPDATE NOTE ===");
             Console.WriteLine($"📝 Nota ID: {id}");
             Console.WriteLine($"📊 DTO recibido: {System.Text.Json.JsonSerializer.Serialize(dto)}");
+            Console.WriteLine($"🎯 Priority del DTO: '{dto.Priority}'");
             
             var note = await _context.ShiftHandOffNotes.FirstOrDefaultAsync(n => n.Id == id);
             if (note == null)
             {
                 return NotFound(new { message = "Nota no encontrada" });
             }
+
+            Console.WriteLine($"🔍 Nota encontrada - Priority actual: '{note.Priority}'");
 
             var currentUser = await GetCurrentUserAsync();
             if (currentUser == null)
@@ -156,6 +161,22 @@ namespace ExcelProcessorApi.Controllers
                 }
 
                 note.Description = dto.Description.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Type))
+            {
+                note.Type = string.IsNullOrWhiteSpace(dto.Type) ? "informativo" : dto.Type.Trim();
+            }
+
+            if (dto.Priority != null) // Cambiado a != null en lugar de !IsNullOrWhiteSpace
+            {
+                Console.WriteLine($"🔄 Actualizando Priority de '{note.Priority}' a '{dto.Priority.Trim()}'");
+                note.Priority = string.IsNullOrWhiteSpace(dto.Priority) ? "Media" : dto.Priority.Trim();
+                Console.WriteLine($"✅ Priority actualizado a: '{note.Priority}'");
+            }
+            else
+            {
+                Console.WriteLine($"⚠️ Priority es null, no se actualiza");
             }
 
             if (!string.IsNullOrWhiteSpace(dto.Status))
@@ -400,9 +421,11 @@ namespace ExcelProcessorApi.Controllers
             return new
             {
                 note.Id,
+                note.Title,
                 note.Description,
                 note.Status,
                 note.Type,
+                note.Priority,
                 note.AssignedCoordinatorId,
                 CreatedAt = EnsureUtc(note.CreatedAt),
                 UpdatedAt = EnsureUtc(note.UpdatedAt),

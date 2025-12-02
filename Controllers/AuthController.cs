@@ -66,9 +66,17 @@ namespace ExcelProcessorApi.Controllers
         {
             try
             {
+                Console.WriteLine($"=== DEBUG BACKEND REGISTER ===");
+                Console.WriteLine($"🔐 Intento de registro:");
+                Console.WriteLine($"  - Username: {registerDto.Username}");
+                Console.WriteLine($"  - FirstName: {registerDto.FirstName}");
+                Console.WriteLine($"  - LastName: {registerDto.LastName}");
+                Console.WriteLine($"  - RoleId: {registerDto.RoleId}");
+
                 // Check if username already exists
                 if (await _context.Users.AnyAsync(u => u.Username == registerDto.Username))
                 {
+                    Console.WriteLine("❌ Username ya existe");
                     return BadRequest(new { message = "El nombre de usuario ya existe" });
                 }
 
@@ -76,8 +84,11 @@ namespace ExcelProcessorApi.Controllers
                 var role = await _context.Roles.FindAsync(registerDto.RoleId);
                 if (role == null)
                 {
+                    Console.WriteLine($"❌ Rol inválido: {registerDto.RoleId}");
                     return BadRequest(new { message = "Rol inválido" });
                 }
+
+                Console.WriteLine($"✅ Rol encontrado: {role.Name}");
 
                 var user = new User
                 {
@@ -91,12 +102,13 @@ namespace ExcelProcessorApi.Controllers
                 };
 
                 _context.Users.Add(user);
-                await _context.SaveChangesAsync();
+                var saveResult = await _context.SaveChangesAsync();
+                Console.WriteLine($"✅ Usuario guardado: {saveResult} filas afectadas, ID: {user.Id}");
 
                 // Load the role for response
                 await _context.Entry(user).Reference(u => u.Role).LoadAsync();
 
-var token = _jwtService.GenerateToken(user.Username, user.Role?.Name ?? "User");
+                var token = _jwtService.GenerateToken(user.Username, user.Role?.Name ?? "User");
                 var expiresAt = DateTime.UtcNow.AddHours(24);
 
                 var response = new AuthResponseDto
@@ -110,10 +122,16 @@ var token = _jwtService.GenerateToken(user.Username, user.Role?.Name ?? "User");
                     ExpiresAt = expiresAt
                 };
 
+                Console.WriteLine($"✅ Token generado para: {user.Username}");
+                Console.WriteLine($"📤 Enviando respuesta: {System.Text.Json.JsonSerializer.Serialize(new { message = "Usuario registrado exitosamente", user })}");
+                Console.WriteLine($"=== FIN DEBUG REGISTER ===");
+
                 return Ok(new { message = "Usuario registrado exitosamente", user = response });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error en registro: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
                 return StatusCode(500, new { message = $"Error en el registro: {ex.Message}" });
             }
         }

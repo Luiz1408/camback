@@ -221,6 +221,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Configurar archivos estáticos
+app.UseStaticFiles();
+
+// Configurar archivos estáticos personalizados para uploads
+var staticFilesOptions = new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads"
+};
+app.UseStaticFiles(staticFilesOptions);
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

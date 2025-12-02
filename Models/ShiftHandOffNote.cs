@@ -11,6 +11,11 @@ namespace ExcelProcessorApi.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        [Required]
+        [MaxLength(200)]
+        public string Title { get; set; } = string.Empty;
+
+        [Required]
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;
 
@@ -19,6 +24,9 @@ namespace ExcelProcessorApi.Models
 
         [MaxLength(20)]
         public string Type { get; set; } = "informativo"; // "informativo" o "seguimiento"
+
+        [MaxLength(20)]
+        public string Priority { get; set; } = "Media"; // "Alta", "Media", "Baja"
 
         public int? AssignedCoordinatorId { get; set; }
 

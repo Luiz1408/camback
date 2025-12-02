@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Fernando\\ExcelProcessorApi\\ExcelProcessorApi.csproj": {}
+    "C:\\Users\\Fernando\\Truper_CAM_new\\ExcelProcessorApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Fernando\\ExcelProcessorApi\\ExcelProcessorApi.csproj": {
+    "C:\\Users\\Fernando\\Truper_CAM_new\\ExcelProcessorApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Fernando\\ExcelProcessorApi\\ExcelProcessorApi.csproj",
+        "projectUniqueName": "C:\\Users\\Fernando\\Truper_CAM_new\\ExcelProcessorApi.csproj",
         "projectName": "ExcelProcessorApi",
-        "projectPath": "C:\\Users\\Fernando\\ExcelProcessorApi\\ExcelProcessorApi.csproj",
+        "projectPath": "C:\\Users\\Fernando\\Truper_CAM_new\\ExcelProcessorApi.csproj",
         "packagesPath": "C:\\Users\\Fernando\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Fernando\\ExcelProcessorApi\\obj\\",
+        "outputPath": "C:\\Users\\Fernando\\Truper_CAM_new\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Fernando\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -59,6 +59,12 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[9.0.10, )"
+            },
+            "Microsoft.CodeAnalysis.Analyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.3.4, )"
             },
             "Microsoft.EntityFrameworkCore.Relational": {
               "target": "Package",

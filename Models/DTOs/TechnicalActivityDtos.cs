@@ -15,6 +15,19 @@ namespace ExcelProcessorApi.Models.DTOs
         public DateTime? EndDate { get; set; }
         public BasicUserDto? CreatedBy { get; set; }
         public BasicUserDto? UpdatedBy { get; set; }
+        public List<TechnicalActivityImageDto> Images { get; set; } = new();
+    }
+
+    public class TechnicalActivityImageDto
+    {
+        public int Id { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
+        public string OriginalFileName { get; set; } = string.Empty;
+        public string FileExtension { get; set; } = string.Empty;
+        public long FileSize { get; set; }
+        public string Url { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 
     public class BasicUserDto

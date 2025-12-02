@@ -338,6 +338,11 @@ namespace ExcelProcessorApi.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -345,10 +350,20 @@ namespace ExcelProcessorApi.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasDefaultValue("Pendiente");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Turno")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -424,6 +439,67 @@ namespace ExcelProcessorApi.Migrations
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("TechnicalActivities");
+                });
+
+            modelBuilder.Entity("ExcelProcessorApi.Models.TechnicalActivityImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("TechnicalActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("TechnicalActivityId");
+
+                    b.ToTable("TechnicalActivityImages");
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.User", b =>
@@ -617,6 +693,25 @@ namespace ExcelProcessorApi.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
+            modelBuilder.Entity("ExcelProcessorApi.Models.TechnicalActivityImage", b =>
+                {
+                    b.HasOne("ExcelProcessorApi.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ExcelProcessorApi.Models.TechnicalActivity", "TechnicalActivity")
+                        .WithMany("Images")
+                        .HasForeignKey("TechnicalActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("TechnicalActivity");
+                });
+
             modelBuilder.Entity("ExcelProcessorApi.Models.User", b =>
                 {
                     b.HasOne("ExcelProcessorApi.Models.Role", "Role")
@@ -640,6 +735,11 @@ namespace ExcelProcessorApi.Migrations
             modelBuilder.Entity("ExcelProcessorApi.Models.ShiftHandOffNote", b =>
                 {
                     b.Navigation("Acknowledgements");
+                });
+
+            modelBuilder.Entity("ExcelProcessorApi.Models.TechnicalActivity", b =>
+                {
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

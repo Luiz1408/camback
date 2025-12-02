@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExcelProcessorApi.Models
 {
@@ -32,5 +33,8 @@ namespace ExcelProcessorApi.Models
 
         public int? UpdatedByUserId { get; set; }
         public User? UpdatedByUser { get; set; }
+
+        // Relación con imágenes
+        public ICollection<TechnicalActivityImage> Images { get; set; } = new List<TechnicalActivityImage>();
     }
 }
