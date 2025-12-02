@@ -409,8 +409,8 @@ export const ChartsView = ({ viewConfig = {} }) => {
       <MainNavbar
         displayName={displayName || currentUser?.username || ''}
         role={currentUser?.role}
-        isAdmin={isAdmin}
-        onManageUsers={isAdmin ? handleManageUsers : undefined}
+        isAdmin={currentUser?.role === 'Administrador'}
+        onManageUsers={currentUser?.role === 'Administrador' ? handleManageUsers : undefined}
         onLogout={handleLogout}
       />
 

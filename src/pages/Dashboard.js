@@ -44,8 +44,16 @@ const Dashboard = () => {
     tiempoPromedio: '0 min',
   });
 
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = currentUser?.role === 'Administrador';
   const displayName = currentUser?.displayName;
+  
+  const handleManageUsers = () => {
+    openUserManagementModal();
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -66,11 +74,11 @@ const Dashboard = () => {
   return (
     <div className="dashboard-wrapper min-vh-100">
       <MainNavbar
-        displayName={displayName || currentUser?.username || 'usuario'}
+        displayName={displayName || currentUser?.username || ''}
         role={currentUser?.role}
-        isAdmin={isAdmin}
-        onManageUsers={isAdmin ? openUserManagementModal : undefined}
-        onLogout={logout}
+        isAdmin={currentUser?.role === 'Administrador'}
+        onManageUsers={currentUser?.role === 'Administrador' ? handleManageUsers : undefined}
+        onLogout={handleLogout}
       />
 
       <main className="container py-5">

@@ -21,6 +21,23 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Estilos para búsqueda y filtros */
+.planeacion-filters {
+  background: var(--planeacion-card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--planeacion-shadow);
+  border: 1px solid var(--planeacion-border);
+}
+
+.planeacion-pagination {
+  background: var(--planeacion-card-bg);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: var(--planeacion-shadow);
+  border: 1px solid var(--planeacion-border);
+}
+
 /* Contenedor principal */
 .planeacion-container {
   max-width: 1400px;
@@ -161,8 +178,12 @@ body {
   background: var(--planeacion-warning);
 }
 
-.planeacion-activity-card.en-progreso::before {
-  background: var(--planeacion-accent);
+.planeacion-activity-card.en-proceso::before {
+  background: var(--planeacion-warning);
+}
+
+.planeacion-activity-card.programado::before {
+  background: var(--planeacion-warning);
 }
 
 .planeacion-activity-card.completada::before {

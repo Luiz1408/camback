@@ -11,6 +11,17 @@ export async function fetchTechnicalActivitiesSummary() {
 }
 
 export async function createTechnicalActivity(payload) {
+  // Si payload es FormData, enviarlo directamente
+  if (payload instanceof FormData) {
+    const { data } = await api.post('/TechnicalActivities', payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data?.activity ?? null;
+  }
+  
+  // Si no, enviar como JSON (mantener compatibilidad)
   const { data } = await api.post('/TechnicalActivities', payload);
   return data?.activity ?? null;
 }

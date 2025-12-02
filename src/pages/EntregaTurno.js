@@ -5,13 +5,12 @@ import MainNavbar from '../components/Layout/MainNavbar';
 import Footer from '../components/Layout/Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserManagement } from '../contexts/UserManagementContext';
-import { formatDateTime } from '../utils/date';
 import api from '../services/api';
 import ModernModal from '../components/Common/ModernModal';
 import '../components/Common/ModernModal.css';
 import './EntregaTurno.css';
+import './EntregaTurno-titles.css';
 
-// Función para formatear solo fecha sin hora
 const formatDate = (dateString) => {
   if (!dateString) return '';
   
@@ -43,13 +42,11 @@ const STATUS_OPTIONS = [
 
 const FINALIZADOS_STATUSES = ['Completado', 'Cancelado'];
 
-// Función para encontrar ID de usuario por username (incluye admins y coordinadores)
 const findUserIdByUsername = (username, coordinators, allUsers = null) => {
   if (!username) return null;
   
   console.log(`🔍 Buscando usuario "${username}" en coordinadores:`, coordinators);
   
-  // Primero buscar en coordinadores
   if (coordinators) {
     const coordinator = coordinators.find(c => 
       c.username === username || 
@@ -64,7 +61,6 @@ const findUserIdByUsername = (username, coordinators, allUsers = null) => {
     }
   }
   
-  // Si no se encuentra en coordinadores, buscar en todos los usuarios (para admins)
   if (allUsers) {
     const user = allUsers.find(u => 
       u.username === username || 
@@ -83,7 +79,6 @@ const findUserIdByUsername = (username, coordinators, allUsers = null) => {
   return null;
 };
 
-// Función para extraer ID del token JWT
 const extractIdFromToken = () => {
   try {
     const token = localStorage.getItem('token');
@@ -93,7 +88,6 @@ const extractIdFromToken = () => {
       const payload = JSON.parse(atob(token.split('.')[1]));
       console.log('🔍 Payload del token:', payload);
       
-      // Buscar diferentes campos donde podría estar el ID
       const possibleIds = [
         payload.sub,
         payload.userId,
@@ -105,14 +99,11 @@ const extractIdFromToken = () => {
       
       console.log('🔍 Posibles IDs encontrados:', possibleIds);
       
-      // Si es string, intentar convertir a número si es posible
       const id = possibleIds.find(id => id != null);
       if (id) {
-        // Si es "Adriana", necesitamos buscar su ID en los coordinadores
         if (typeof id === 'string' && isNaN(id)) {
           console.log('🔍 El ID es un nombre, buscando en coordinadores...');
-          // Aquí necesitaríamos una función para buscar por username
-          return null; // Temporal
+          return null;
         }
         
         return typeof id === 'string' && !isNaN(id) ? parseInt(id) : id;
@@ -124,7 +115,6 @@ const extractIdFromToken = () => {
   return null;
 };
 
-// Extraer el nombre del usuario de forma segura
 const getUserName = (user) => {
   if (!user) return 'Usuario';
   return user.username || user.name || user.fullName || 
@@ -132,74 +122,92 @@ const getUserName = (user) => {
          'Usuario';
 };
 
-// Función para obtener el nombre del usuario a partir de su ID
 const getUserNameById = (userId, coordinators, allUsers = null) => {
   console.log(`🔍 Buscando usuario con ID: ${userId}`);
   console.log(`👥 Coordinadores disponibles:`, coordinators.map(c => ({ id: c.id, name: c.fullName || c.username })));
   
   if (!userId) return 'Usuario';
   
-  // Primero buscar en coordinadores
   if (coordinators) {
     const coordinator = coordinators.find(c => c.id == userId);
     console.log(`🎯 Coordinador encontrado:`, coordinator);
     
     if (coordinator) {
       const name = coordinator.fullName || coordinator.name || 
-             (coordinator.firstName && coordinator.lastName ? `${coordinator.firstName} ${coordinator.lastName}`.trim() : null) ||
-             coordinator.username ||
-             `Coordinador ${userId}`;
-      
-      console.log(`✅ Nombre extraído de coordinador: ${name}`);
+        (coordinator.firstName && coordinator.lastName ? `${coordinator.firstName} ${coordinator.lastName}`.trim() : null) ||
+        coordinator.username ||
+        `Coordinador ${coordinator.id}`;
+      console.log(`✅ Nombre encontrado: "${name}"`);
       return name;
     }
   }
   
-  // Si no encuentra en coordinadores, buscar en todos los usuarios (para admins)
   if (allUsers) {
     const user = allUsers.find(u => u.id == userId);
     console.log(`🎯 Usuario encontrado en allUsers:`, user);
     
     if (user) {
       const name = user.fullName || user.name || 
-             (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}`.trim() : null) ||
-             user.username ||
-             `Usuario ${userId}`;
-      
-      console.log(`✅ Nombre extraído de allUsers: ${name}`);
+        (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}`.trim() : null) ||
+        user.username ||
+        `Usuario ${user.id}`;
+      console.log(`✅ Nombre encontrado en allUsers: "${name}"`);
       return name;
     }
   }
   
-  console.log(`❌ No se encontró usuario con ID ${userId}`);
+  console.log(`❌ No se encontró nombre para ID ${userId}`);
   return 'Usuario';
 };
 
 const EntregaTurno = () => {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
-  const userManagement = useUserManagement();
-  const openUserManagementModal = userManagement?.openModal;
-
+  const { openUserManagementModal } = useUserManagement();
+  
   const [rows, setRows] = useState([]);
+  const [coordinatorOptions, setCoordinatorOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [coordinatorOptions, setCoordinatorOptions] = useState([]);
+  const [activeTab, setActiveTab] = useState('activas');
   const [ackLoadingKeys, setAckLoadingKeys] = useState(new Set());
   const [deletingNoteIds, setDeletingNoteIds] = useState(new Set());
-  const [deleteModalState, setDeleteModalState] = useState(DELETE_MODAL_INITIAL_STATE);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('todos');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [notesPerPage] = useState(5);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [creatingNote, setCreatingNote] = useState(false);
-  const [activeTab, setActiveTab] = useState('activas');
+  const [newNoteTitle, setNewNoteTitle] = useState('');
   const [newNoteDescription, setNewNoteDescription] = useState('');
   const [newNoteType, setNewNoteType] = useState('informativo');
+  const [newNotePriority, setNewNotePriority] = useState('Media');
+  const [creatingNote, setCreatingNote] = useState(false);
   const [createModalError, setCreateModalError] = useState('');
 
   const isAdmin = currentUser?.role === 'Administrador';
   const isCoordinator = currentUser?.role === 'Coordinador';
   const normalizedCurrentUsername = currentUser?.username?.trim().toLowerCase() ?? '';
   
-  const hasPermissionToInteract = isAdmin || isCoordinator;
+  const filteredRows = useMemo(() => {
+    return rows.filter(row => {
+      const matchesSearch = row.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           row.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesPriority = priorityFilter === 'todos' || row.priority === priorityFilter;
+      return matchesSearch && matchesPriority;
+    });
+  }, [rows, searchTerm, priorityFilter]);
+
+  const indexOfLastNote = currentPage * notesPerPage;
+  const indexOfFirstNote = indexOfLastNote - notesPerPage;
+  const currentNotes = filteredRows.slice(indexOfFirstNote, indexOfLastNote);
+  const totalPages = Math.ceil(filteredRows.length / notesPerPage);
+
+  const activeTasks = currentNotes.filter(row => !FINALIZADOS_STATUSES.includes(row.status));
+  const finalizedTasks = currentNotes.filter(row => FINALIZADOS_STATUSES.includes(row.status));
+
+  const hasPermissionToInteract = isAdmin;
   const hasPermissionToCreate = isAdmin || isCoordinator;
 
   const displayName = useMemo(() => {
@@ -229,7 +237,7 @@ const EntregaTurno = () => {
       setLoading(true);
       
       const [notesResponse, coordinatorsResponse] = await Promise.all([
-        api.get('/shiftHandOff'),
+        api.get('/ShiftHandOff'),
         api.get('/User/coordinators'),
       ]);
 
@@ -239,7 +247,6 @@ const EntregaTurno = () => {
       const safeNotes = Array.isArray(notes) ? notes : [];
       const safeCoordinators = Array.isArray(coordinators) ? coordinators : [];
 
-      // LIMPIEZA: Eliminar acknowledgments de coordinadores fantasmas del localStorage
       const localAcknowledgments = JSON.parse(localStorage.getItem('turnoAcknowledgments') || '{}');
       const validCoordinatorIds = safeCoordinators.map(c => c.id.toString());
       
@@ -249,7 +256,6 @@ const EntregaTurno = () => {
         const cleanedNoteAck = {};
         
         Object.keys(noteAck).forEach(key => {
-          // Mantener solo claves válidas (no coordinadores fantasmas)
           if (!/^\d+$/.test(key) || validCoordinatorIds.includes(key)) {
             cleanedNoteAck[key] = noteAck[key];
           } else {
@@ -260,18 +266,15 @@ const EntregaTurno = () => {
         localAcknowledgments[noteId] = cleanedNoteAck;
       });
       
-      // Guardar localStorage limpio si se eliminó algo
       if (cleanedAny) {
         localStorage.setItem('turnoAcknowledgments', JSON.stringify(localAcknowledgments));
       }
 
       const mappedRows = safeNotes.map((note) => {
-        // Transformar acknowledgements del backend al formato del frontend
         const transformedAcknowledgedBy = {};
         
         if (note.acknowledgements && Array.isArray(note.acknowledgements)) {
           note.acknowledgements.forEach(ack => {
-            // Solo transformar si el coordinador existe en la lista válida
             if (safeCoordinators.find(c => c.id == ack.coordinatorUserId)) {
               transformedAcknowledgedBy[ack.coordinatorUserId] = {
                 checked: ack.isAcknowledged || false,
@@ -286,11 +289,9 @@ const EntregaTurno = () => {
           });
         }
         
-        // Aplicar localStorage limpio como fallback
         if (localAcknowledgments[note.id]) {
           Object.assign(transformedAcknowledgedBy, localAcknowledgments[note.id]);
           
-          // Si fue auto-completada en localStorage, restaurar ese estado SOLO si el backend dice que está completada
           if (localAcknowledgments[note.id]._autoCompleted && note.status === 'Completado') {
             note.status = 'Completado';
             note.finalizedAt = localAcknowledgments[note.id]._autoCompletedAt;
@@ -300,7 +301,6 @@ const EntregaTurno = () => {
               finalizedByUserId: note.finalizedByUserId
             }, null, 2));
           } else if (localAcknowledgments[note.id]._autoCompleted && note.status !== 'Completado') {
-            // La nota fue reactivada, limpiar el estado de auto-completado
             delete localAcknowledgments[note.id]._autoCompleted;
             delete localAcknowledgments[note.id]._autoCompletedAt;
             delete localAcknowledgments[note.id]._autoCompletedBy;
@@ -308,23 +308,20 @@ const EntregaTurno = () => {
           }
         }
         
-        // Logging para verificar datos de finalización del backend
         if (FINALIZADOS_STATUSES.includes(note.status) && (note.finalizedAt || note.finalizedByUserId)) {
           console.log(`📝 Nota ${note.id} con datos de finalización del backend:`, JSON.stringify({
             status: note.status,
             finalizedAt: note.finalizedAt,
             finalizedByUserId: note.finalizedByUserId,
-            finalizedBy: note.finalizedBy  // Verificar si viene del backend
+            finalizedBy: note.finalizedBy
           }, null, 2));
           
-          // Verificar si getUserNameById funciona
           if (note.finalizedByUserId) {
             const userName = getUserNameById(note.finalizedByUserId, safeCoordinators, [{ ...currentUser, id: 1 }]);
             console.log(`🔍 getUserNameById(${note.finalizedByUserId}) = "${userName}"`);
           }
         }
         
-        // Complementar con coordinadores que no tienen acknowledgments
         safeCoordinators.forEach(coordinator => {
           if (!transformedAcknowledgedBy[coordinator.id]) {
             transformedAcknowledgedBy[coordinator.id] = {
@@ -338,12 +335,12 @@ const EntregaTurno = () => {
         const result = {
           ...note,
           status: note.status ?? DEFAULT_STATUS,
+          title: note.title ?? '',
           description: note.description ?? '',
           type: note.type ?? DEFAULT_TYPE,
           priority: note.priority ?? DEFAULT_PRIORITY,
           assignedCoordinatorId: note.assignedCoordinatorId ?? null,
           acknowledgedBy: transformedAcknowledgedBy,
-          // Obtener el nombre del usuario a partir del ID
           finalizedAt: note.finalizedAt || null,
           finalizedBy: note.finalizedByUserId ? getUserNameById(note.finalizedByUserId, safeCoordinators, [{ ...currentUser, id: 1 }]) : null,
           finalizedByUserId: note.finalizedByUserId || null
@@ -369,21 +366,29 @@ const EntregaTurno = () => {
   }, [loadData]);
 
   const handleAddRow = useCallback(() => {
-    // Permitir que cualquier usuario autenticado cree notas
     if (!currentUser) {
       setError('Debes estar autenticado para crear notas.');
       return;
     }
 
     setShowCreateModal(true);
+    setNewNoteTitle('');
     setNewNoteDescription('');
     setNewNoteType('informativo');
     setCreateModalError('');
   }, [currentUser]);
 
+  const resetCreateModal = useCallback(() => {
+    setNewNoteTitle('');
+    setNewNoteDescription('');
+    setNewNoteType('informativo');
+    setNewNotePriority('Media');
+    setCreateModalError('');
+  }, []);
+
   const handleCreateNote = useCallback(async () => {
-    if (!newNoteDescription.trim()) {
-      setCreateModalError('La descripción de la nota es requerida.');
+    if (!newNoteTitle.trim() || !newNoteDescription.trim()) {
+      setCreateModalError('El título y la descripción de la nota son requeridos.');
       return;
     }
 
@@ -392,22 +397,26 @@ const EntregaTurno = () => {
       setCreateModalError('');
 
       const payload = {
+        title: newNoteTitle.trim(),
         description: newNoteDescription.trim(),
         type: newNoteType,
+        priority: newNotePriority,
         status: DEFAULT_STATUS,
-        createdBy: currentUser,
+        createdByUserId: currentUser?.id,
         createdAt: new Date().toISOString()
       };
 
-      const response = await api.post('/shiftHandOff', payload);
+      const response = await api.post('/ShiftHandOff', payload);
       const newNote = response?.data?.data ?? response?.data;
 
       if (newNote) {
         const processedNote = {
           ...newNote,
           status: newNote.status ?? DEFAULT_STATUS,
+          title: newNote.title ?? newNoteTitle.trim(),
           description: newNote.description ?? newNoteDescription.trim(),
           type: newNote.type ?? newNoteType,
+          priority: newNote.priority ?? newNotePriority,
           acknowledgedBy: newNote.acknowledgedBy ?? {},
           createdBy: newNote.createdBy ?? currentUser,
           createdAt: newNote.createdAt ?? new Date().toISOString(),
@@ -417,15 +426,42 @@ const EntregaTurno = () => {
       }
 
       setShowCreateModal(false);
+      setNewNoteTitle('');
       setNewNoteDescription('');
       setNewNoteType('informativo');
+      setNewNotePriority('Media');
     } catch (err) {
       console.error('Error al crear nota:', err);
       setCreateModalError('No se pudo crear la nota.');
     } finally {
       setCreatingNote(false);
     }
-  }, [newNoteDescription, newNoteType, currentUser]);
+  }, [newNoteTitle, newNoteDescription, newNoteType, newNotePriority, currentUser]);
+
+  const handleTitleChange = useCallback((noteId, value) => {
+    setRows((prev) =>
+      prev.map((row) =>
+        row.id === noteId ? { ...row, title: value, hasUnsavedChanges: true } : row
+      )
+    );
+  }, []);
+
+  const handleTitleBlur = useCallback(async (noteId, value) => {
+    const row = rows.find((r) => r.id === noteId);
+    if (!row || row.title === value) return;
+
+    try {
+      await api.put(`/ShiftHandOff/${noteId}`, { title: value });
+      setRows((prev) =>
+        prev.map((r) => (r.id === noteId ? { ...r, title: value, hasUnsavedChanges: false } : r))
+      );
+    } catch (err) {
+      setError('No se pudo actualizar el título.');
+      setRows((prev) =>
+        prev.map((r) => (r.id === noteId ? { ...r, title: row.title, hasUnsavedChanges: false } : r))
+      );
+    }
+  }, [rows]);
 
   const handleDescriptionChange = useCallback((noteId, value) => {
     setRows((prev) =>
@@ -440,7 +476,7 @@ const EntregaTurno = () => {
     if (!row || row.description === value) return;
 
     try {
-      await api.put(`/shiftHandOff/${noteId}`, { description: value });
+      await api.put(`/ShiftHandOff/${noteId}`, { description: value });
       setRows((prev) =>
         prev.map((r) => (r.id === noteId ? { ...r, description: value, hasUnsavedChanges: false } : r))
       );
@@ -454,7 +490,7 @@ const EntregaTurno = () => {
 
   const handleTypeChange = useCallback(async (noteId, type) => {
     try {
-      await api.put(`/shiftHandOff/${noteId}`, { type });
+      await api.put(`/ShiftHandOff/${noteId}`, { type });
       setRows((prev) =>
         prev.map((row) =>
           row.id === noteId ? { ...row, type } : row
@@ -467,7 +503,7 @@ const EntregaTurno = () => {
 
   const handlePriorityChange = useCallback(async (noteId, priority) => {
     try {
-      await api.put(`/shiftHandOff/${noteId}`, { priority });
+      await api.put(`/ShiftHandOff/${noteId}`, { priority });
       setRows((prev) =>
         prev.map((row) =>
           row.id === noteId ? { ...row, priority } : row
@@ -478,23 +514,25 @@ const EntregaTurno = () => {
     }
   }, []);
 
-  const handleStatusChange = useCallback(async (noteId, status) => {
+  const handleStatusChange = useCallback(async (noteId, status, finalizerName = null) => {
     try {
       console.log(`🔄 Cambiando estatus de nota ${noteId} a ${status}`);
       
-      // Preparar datos para enviar al backend
       const updateData = { status };
       
-      // Agregar información de finalización SOLO para estatus finales
       if (FINALIZADOS_STATUSES.includes(status)) {
-        updateData.finalizedAt = new Date().toISOString().split('T')[0]; // Solo fecha sin hora
-        // Extraer ID del usuario desde diferentes fuentes
+        updateData.finalizedAt = new Date().toISOString();
         const userId = currentUser?.id || currentUser?.userId || currentUser?.sub || 
                       extractIdFromToken() || 
                       (currentUser?.username ? findUserIdByUsername(currentUser.username, coordinatorOptions, [{ ...currentUser, id: 1 }]) : null) ||
-                      (currentUser?.fullName ? '2' : null); // Temporal: usar ID 2 para Adriana
+                      (currentUser?.fullName ? '2' : null);
         
-        updateData.finalizedByUserId = userId;
+        if (!userId || userId === null || userId === undefined) {
+          console.warn('⚠️ No se pudo obtener ID de usuario, usando valor por defecto');
+          updateData.finalizedByUserId = 2;
+        } else {
+          updateData.finalizedByUserId = userId;
+        }
         
         console.log('🔍 Intentando obtener ID de usuario:');
         console.log('  - currentUser.id:', currentUser?.id);
@@ -503,9 +541,7 @@ const EntregaTurno = () => {
         console.log('  - extractIdFromToken():', extractIdFromToken());
         console.log('  - currentUser.username:', currentUser?.username);
         console.log('  - findUserIdByUsername():', currentUser?.username ? findUserIdByUsername(currentUser.username, coordinatorOptions, [{ ...currentUser, id: 1 }]) : null);
-        console.log('  - ID final usado:', userId);
-        
-        // NOTA: La BD no guarda el nombre, solo el ID. El nombre se obtendrá al cargar.
+        console.log('  - ID final usado:', updateData.finalizedByUserId);
         
         console.log('📝 Enviando datos de finalización:', JSON.stringify({
           finalizedAt: updateData.finalizedAt,
@@ -513,12 +549,8 @@ const EntregaTurno = () => {
         }, null, 2));
         console.log('📝 Datos completos enviados al backend:', JSON.stringify(updateData, null, 2));
       } else {
-        // Si se reactiva, enviar null para limpiar
         updateData.finalizedAt = null;
         updateData.finalizedByUserId = null;
-        
-        console.log('📝 Limpiando datos de finalización');
-        console.log('📝 Datos completos enviados al backend:', JSON.stringify(updateData, null, 2));
       }
       
       console.log('👤 currentUser completo:', JSON.stringify(currentUser, null, 2));
@@ -526,11 +558,15 @@ const EntregaTurno = () => {
       console.log('🆔 currentUser.username:', currentUser?.username);
       console.log('👥 coordinatorOptions:', coordinatorOptions.map(c => ({ id: c.id, username: c.username, fullName: c.fullName })));
       
-      const response = await api.put(`/shiftHandOff/${noteId}`, updateData);
+      const response = await api.put(`/ShiftHandOff/${noteId}`, updateData);
       console.log('✅ Respuesta del backend:', JSON.stringify(response, null, 2));
       
-      // Obtener la fila actual para preservar acknowledgments
       const currentRow = rows.find(row => row.id === noteId);
+      
+      let finalizerDisplayName = finalizerName;
+      if (!finalizerDisplayName) {
+        finalizerDisplayName = getUserName(currentUser);
+      }
       
       setRows((prev) =>
         prev.map((row) =>
@@ -538,11 +574,9 @@ const EntregaTurno = () => {
             ? {
                 ...row,
                 status,
-                // Mantener los datos localmente para mostrarlos inmediatamente
                 finalizedAt: updateData.finalizedAt,
-                finalizedBy: updateData.finalizedByUserId ? getUserNameById(updateData.finalizedByUserId, coordinatorOptions, [{ ...currentUser, id: 1 }]) : null,
+                finalizedBy: updateData.finalizedByUserId ? finalizerDisplayName : null,
                 finalizedByUserId: updateData.finalizedByUserId,
-                // Limpiar acknowledgments del coordinador que reactiva
                 ...(!FINALIZADOS_STATUSES.includes(status) && {
                   acknowledgedBy: {
                     ...(row.acknowledgedBy || {}),
@@ -554,9 +588,7 @@ const EntregaTurno = () => {
         )
       );
 
-      // Si se reactiva la nota, limpiar auto-completado Y actualizar backend
       if (!FINALIZADOS_STATUSES.includes(status)) {
-        // Limpiar auto-completado del localStorage
         const localAcknowledgments = JSON.parse(localStorage.getItem('turnoAcknowledgments') || '{}');
         if (localAcknowledgments[noteId] && localAcknowledgments[noteId]._autoCompleted) {
           delete localAcknowledgments[noteId]._autoCompleted;
@@ -565,10 +597,9 @@ const EntregaTurno = () => {
           localStorage.setItem('turnoAcknowledgments', JSON.stringify(localAcknowledgments));
         }
         
-        // Si es un coordinador reactivando, limpiar su acknowledgment en el backend
         if (isCoordinator && currentUser?.id) {
           try {
-            await api.put(`/shiftHandOff/${noteId}/acknowledge`, {
+            await api.put(`/ShiftHandOff/${noteId}/acknowledge`, {
               coordinatorId: currentUser.id,
               checked: false
             });
@@ -579,10 +610,9 @@ const EntregaTurno = () => {
         }
       }
       
-      // Mostrar mensaje de éxito
       if (FINALIZADOS_STATUSES.includes(status)) {
         const actionText = status === 'Completado' ? 'finalizada' : 'cancelada';
-        const userName = getUserName(currentUser);
+        const userName = finalizerDisplayName || getUserName(currentUser);
         toast.success(`✅ Nota ${actionText} exitosamente por ${userName}`);
       } else {
         const userName = getUserName(currentUser);
@@ -593,12 +623,22 @@ const EntregaTurno = () => {
         }
       }
     } catch (err) {
-      console.error('❌ Error al actualizar estatus:', err);
-      console.error('❌ Detalles del error:', err.response?.data || err.message);
-      setError('No se pudo actualizar el estatus.');
+      console.error('Error al cambiar estatus:', err);
+      
+      if (err.response) {
+        console.error('Error response:', {
+          status: err.response.status,
+          data: err.response.data,
+          headers: err.response.headers
+        });
+        setError(`Error al actualizar estatus: ${err.response.status} - ${err.response.data?.message || err.response.data || 'Error desconocido'}`);
+      } else {
+        setError(`Error al actualizar estatus: ${err.message || 'No se pudo actualizar el estatus.'}`);
+      }
+      
       toast.error(`❌ Error: ${err.response?.data?.message || err.message || 'No se pudo actualizar el estatus'}`);
     }
-  }, [currentUser, isCoordinator, rows]);
+  }, [currentUser, isCoordinator, coordinatorOptions, rows]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -626,23 +666,12 @@ const EntregaTurno = () => {
     return { totalAcknowledged, totalPossible };
   }, [rows]);
 
-  // Filtrar notas por pestaña activa
-  const activeTasks = useMemo(() => {
-    return rows.filter(row => !FINALIZADOS_STATUSES.includes(row.status));
-  }, [rows]);
-
-  const finalizedTasks = useMemo(() => {
-    return rows.filter(row => FINALIZADOS_STATUSES.includes(row.status));
-  }, [rows]);
-
   const currentTasks = activeTab === 'activas' ? activeTasks : finalizedTasks;
 
-  // Verificar si todos los coordinadores han marcado la casilla
   const checkAllCoordinatorsAcknowledged = useCallback((noteId) => {
     const note = rows.find(row => row.id === noteId);
     if (!note || coordinatorOptions.length === 0) return false;
 
-    // Solo contar coordinadores que existen en coordinatorOptions
     const validAcknowledgements = coordinatorOptions.map(coordinator => {
       const ack = note.acknowledgedBy?.[coordinator.id];
       const isChecked = ack?.checked || false;
@@ -660,12 +689,10 @@ const EntregaTurno = () => {
     return acknowledgedCount === totalCount;
   }, [rows, coordinatorOptions]);
 
-  // Auto-mover a completado si todos los coordinadores marcaron (solo para notas informativas)
   const autoMoveToCompleted = useCallback(async (noteId) => {
     const note = rows.find(row => row.id === noteId);
     if (!note) return;
     
-    // Solo auto-mover notas informativas que no estén ya completadas
     if (note.type !== 'informativo') {
       return;
     }
@@ -674,10 +701,8 @@ const EntregaTurno = () => {
       return;
     }
     
-    // Verificar con más detalle
     if (checkAllCoordinatorsAcknowledged(noteId)) {
       try {
-        // Guardar en localStorage también
         const localAcknowledgments = JSON.parse(localStorage.getItem('turnoAcknowledgments') || '{}');
         if (localAcknowledgments[noteId]) {
           localAcknowledgments[noteId]._autoCompleted = true;
@@ -686,9 +711,8 @@ const EntregaTurno = () => {
           localStorage.setItem('turnoAcknowledgments', JSON.stringify(localAcknowledgments));
         }
         
-        await api.put(`/shiftHandOff/${noteId}`, { status: 'Completado' });
+        await api.put(`/ShiftHandOff/${noteId}`, { status: 'Completado' });
         
-        // Actualizar estado local inmediatamente
         setRows(prev => prev.map(row => 
           row.id === noteId 
             ? { ...row, status: 'Completado', finalizedAt: new Date().toISOString(), finalizedBy: getUserNameById(currentUser?.id || 2, coordinatorOptions, [{ ...currentUser, id: 1 }]), finalizedByUserId: currentUser?.id || 2 }
@@ -703,14 +727,13 @@ const EntregaTurno = () => {
     }
   }, [checkAllCoordinatorsAcknowledged, currentUser, rows]);
 
-  // Función para eliminar notas
   const handleDeleteNote = useCallback(async (noteId) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar esta nota? Esta acción no se puede deshacer.')) {
       return;
     }
 
     try {
-      await api.delete(`/shiftHandOff/${noteId}`);
+      await api.delete(`/ShiftHandOff/${noteId}`);
       setRows(prev => prev.filter(row => row.id !== noteId));
       console.log('Nota eliminada:', noteId);
     } catch (err) {
@@ -727,7 +750,6 @@ const EntregaTurno = () => {
     console.log(`👤 Usuario actual:`, currentUser);
     
     try {
-      // Actualizar estado local inmediatamente para feedback instantáneo
       setRows(prev => {
         const updatedRows = prev.map(row => {
           if (row.id === noteId) {
@@ -753,7 +775,6 @@ const EntregaTurno = () => {
         return updatedRows;
       });
 
-      // Guardar en localStorage como fallback
       const localAcknowledgments = JSON.parse(localStorage.getItem('turnoAcknowledgments') || '{}');
       if (!localAcknowledgments[noteId]) {
         localAcknowledgments[noteId] = {};
@@ -766,7 +787,6 @@ const EntregaTurno = () => {
       localStorage.setItem('turnoAcknowledgments', JSON.stringify(localAcknowledgments));
       console.log(`💾 Guardado en localStorage fallback:`, JSON.stringify(localAcknowledgments[noteId], null, 2));
 
-      // Enviar al backend (intento de guardado principal)
       const payload = { 
         coordinatorId, 
         checked,
@@ -777,64 +797,56 @@ const EntregaTurno = () => {
       
       let response;
       try {
-        response = await api.put(`/shiftHandOff/${noteId}/acknowledgements`, payload);
+        response = await api.put(`/ShiftHandOff/${noteId}/acknowledgements`, payload);
         console.log(`✅ Respuesta del backend:`, JSON.stringify(response.data, null, 2));
       } catch (firstError) {
         console.log(`❌ Primer intento fallido:`, firstError);
-        // Intentar con payload simplificado
         const simplePayload = { 
           coordinatorId, 
           checked
         };
         
         console.log(`📤 Enviando payload simplificado:`, JSON.stringify(simplePayload, null, 2));
-        response = await api.put(`/shiftHandOff/${noteId}/acknowledgements`, simplePayload);
+        response = await api.put(`/ShiftHandOff/${noteId}/acknowledgements`, simplePayload);
         console.log(`✅ Respuesta con payload simplificado:`, JSON.stringify(response.data, null, 2));
       }
       
-      // Verificar si hay que auto-mover a completado (solo para informativas)
-      // Mayor retraso para asegurar que el estado se actualizó completamente
       setTimeout(() => {
-        // Forzar una verificación adicional del estado actualizado
         const updatedNote = rows.find(row => row.id === noteId);
         if (updatedNote) {
-          // FORZAR sincronización: si todas las casillas visibles están marcadas pero el estado no coincide
-          const allVisibleChecked = coordinatorOptions.every(coordinator => {
-            // Verificar si la casilla está marcada visualmente (buscando en el DOM)
-            const checkbox = document.querySelector(`#ack-${noteId}-${coordinator.id}`);
-            const isChecked = checkbox?.checked || false;
-            const ackState = updatedNote.acknowledgedBy?.[coordinator.id]?.checked || false;
+          if (updatedNote.type === 'informativo') {
+            const allCoordinatorsChecked = coordinatorOptions.every(coordinator => {
+              return updatedNote.acknowledgedBy?.[coordinator.id]?.checked || false;
+            });
             
-            if (isChecked !== ackState) {
-              // Forzar actualización del estado
-              updatedNote.acknowledgedBy[coordinator.id] = {
-                ...updatedNote.acknowledgedBy[coordinator.id],
-                checked: isChecked,
-                timestamp: isChecked ? new Date().toISOString() : null
-              };
+            console.log(`🔍 Verificación auto-finalización para nota ${noteId}:`);
+            console.log(`  - Tipo: ${updatedNote.type}`);
+            console.log(`  - Todas las casillas marcadas: ${allCoordinatorsChecked}`);
+            console.log(`  - Estado actual: ${updatedNote.status}`);
+            
+            if (allCoordinatorsChecked && updatedNote.status !== 'Completado') {
+              console.log(`🚀 Auto-finalizando nota informativa ${noteId}...`);
+              const userName = getUserName(currentUser);
+              handleStatusChange(noteId, 'Completado', userName);
+              toast.success(`✅ Nota informativa finalizada automáticamente por ${userName} (todos los coordinadores enterados)`);
             }
-            return isChecked;
-          });
-          
-          autoMoveToCompleted(noteId);
+          }
         }
-      }, 300); // Reducido a 300ms para mejor UX
-      
+      }, 1000);
+
     } catch (err) {
-      console.error('❌ Error al actualizar acknowledgment:', err);
-      
-      // Revertir el cambio local si falla el backend
+      console.error('Error al guardar acknowledgment:', err);
       setRows(prev => prev.map(row => {
         if (row.id === noteId) {
+          const originalState = row.acknowledgedBy?.[coordinatorId];
           return {
             ...row,
             acknowledgedBy: {
               ...row.acknowledgedBy,
               [coordinatorId]: {
-                ...row.acknowledgedBy[coordinatorId],
+                ...originalState,
                 checked: !checked,
-                timestamp: row.acknowledgedBy[coordinatorId]?.timestamp || null,
-                acknowledgedBy: row.acknowledgedBy[coordinatorId]?.acknowledgedBy || null
+                timestamp: originalState?.timestamp || null
               }
             }
           };
@@ -842,25 +854,16 @@ const EntregaTurno = () => {
         return row;
       }));
       
-      // También revertir en localStorage
-      const localAcknowledgments = JSON.parse(localStorage.getItem('turnoAcknowledgments') || '{}');
-      if (localAcknowledgments[noteId] && localAcknowledgments[noteId][coordinatorId]) {
-        delete localAcknowledgments[noteId][coordinatorId];
-        if (Object.keys(localAcknowledgments[noteId]).length === 0) {
-          delete localAcknowledgments[noteId];
-        }
-        localStorage.setItem('turnoAcknowledgments', JSON.stringify(localAcknowledgments));
-      }
-      
-      const errorMessage = err.response?.data?.message || err.message || 'No se pudo actualizar el estado de notificación';
-      setError(errorMessage);
-      toast.error(`Error al actualizar notificación: ${errorMessage}`);
+      setError('No se pudo guardar el acknowledgment.');
+    } finally {
+      setAckLoadingKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(`${noteId}-${coordinatorId}`);
+        return newSet;
+      });
     }
-    
-    console.log(`=== FIN GUARDADO ===\n`);
-  }, [currentUser, autoMoveToCompleted, setError]);
+  }, [currentUser, autoMoveToCompleted, setError, rows, coordinatorOptions]);
 
-  // Si no hay usuario autenticado, mostrar mensaje (después de todos los hooks)
   if (!currentUser) {
     return (
       <div className="container mt-4">
@@ -883,13 +886,12 @@ const EntregaTurno = () => {
       <MainNavbar
         displayName={displayName || currentUser?.username || ''}
         role={currentUser?.role}
-        isAdmin={isAdmin}
-        onManageUsers={isAdmin ? handleManageUsers : undefined}
+        isAdmin={currentUser?.role === 'Administrador'}
+        onManageUsers={currentUser?.role === 'Administrador' ? handleManageUsers : undefined}
         onLogout={handleLogout}
       />
 
       <main>
-        {/* Header */}
         <div className="turno-header">
           <div>
             <h1 className="turno-title">Entrega de turno</h1>
@@ -917,7 +919,48 @@ const EntregaTurno = () => {
           </div>
         </div>
 
-        {/* Contenido principal */}
+        <div className="turno-filters mb-4">
+          <div className="row g-3">
+            <div className="col-md-6">
+              <div className="input-group">
+                <span className="input-group-text">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Buscar por título o descripción..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="col-md-4">
+              <select
+                className="form-select"
+                value={priorityFilter}
+                onChange={(e) => {
+                  setPriorityFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="todos">Todas las prioridades</option>
+                <option value="Alta">Prioridad Alta</option>
+                <option value="Media">Prioridad Media</option>
+                <option value="Baja">Prioridad Baja</option>
+              </select>
+            </div>
+            <div className="col-md-2">
+              <div className="text-muted small d-flex align-items-center h-100">
+                {filteredRows.length} {filteredRows.length === 1 ? 'nota' : 'notas'} encontradas
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="turno-card">
           {error && (
             <div className="alert alert-danger" role="alert">
@@ -925,7 +968,6 @@ const EntregaTurno = () => {
             </div>
           )}
 
-          {/* Pestañas */}
           <div className="turno-tabs">
             <button
               className={`turno-tab ${activeTab === 'activas' ? 'turno-tab--active' : ''}`}
@@ -940,6 +982,32 @@ const EntregaTurno = () => {
               Notas Finalizadas ({finalizedTasks.length})
             </button>
           </div>
+
+          {totalPages > 1 && (
+            <div className="turno-pagination mb-4">
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="text-muted small">
+                  Página {currentPage} de {totalPages} ({filteredRows.length} notas totales)
+                </div>
+                <div className="btn-group" role="group">
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <i className="bi bi-chevron-left"></i> Anterior
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Siguiente <i className="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <div className="turno-loading">
@@ -983,79 +1051,77 @@ const EntregaTurno = () => {
                   <div key={`note-${row.id || index}`} className={`turno-note-card ${row.status?.toLowerCase().replace(' ', '-')}`}>
                     <div className="turno-note-header">
                       <div>
-                        <h4 className="turno-note-title">Nota #{row.id}</h4>
+                        <h4 className="turno-note-title">{row.title || 'Sin título'}</h4>
                         <div className="turno-note-time">
                           {formatDate(row.createdAt)}
                         </div>
                       </div>
-                      <div>
-                        {/* Admins siempre ven dropdown, otros usuarios según permisos */}
-                        {(isAdmin || isCoordinator) ? (
-                          <select
-                            className="turno-form-select"
-                            value={row.status || 'Pendiente'}
-                            onChange={(event) => handleStatusChange(row.id, event.target.value)}
-                            // Bloquear si no tiene permisos O si la nota está finalizada
-                          disabled={!isAdmin && !isCoordinator || FINALIZADOS_STATUSES.includes(row.status)}
-                          >
-                            {STATUS_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className={`turno-status-badge ${row.status?.toLowerCase().replace(' ', '-')}`}>
-                            {row.status || 'Pendiente'}
-                          </span>
-                        )}
-                      </div>
                     </div>
 
                     <div className="turno-note-content">
-                      <textarea
-                        className="turno-form-textarea"
-                        rows={3}
-                        placeholder="Describe la nota o incidencia..."
-                        value={row.description}
-                        onChange={(event) => handleDescriptionChange(row.id, event.target.value)}
-                        onBlur={(event) => handleDescriptionBlur(row.id, event.target.value)}
-                        // Bloquear si no tiene permisos O si la nota está finalizada
-                          disabled={!isAdmin && !isCoordinator || FINALIZADOS_STATUSES.includes(row.status)}
-                      />
+                      <div className="turno-note-description">
+                        <textarea
+                          className="turno-form-textarea"
+                          rows={3}
+                          placeholder="Describe la nota o incidencia..."
+                          value={row.description}
+                          onChange={(event) => handleDescriptionChange(row.id, event.target.value)}
+                          onBlur={(event) => handleDescriptionBlur(row.id, event.target.value)}
+                            disabled={!hasPermissionToInteract || FINALIZADOS_STATUSES.includes(row.status)}
+                        />
+                      </div>
                     </div>
 
                     <div className="turno-note-footer">
-                      <div className="d-flex align-items-center gap-2">
-                        <label className="turno-form-label">Tipo:</label>
-                        <select
-                          className="turno-form-select turno-form-select--small"
-                          value={row.type || 'informativo'}
-                          onChange={(event) => handleTypeChange(row.id, event.target.value)}
-                          // Bloquear si no tiene permisos O si la nota está finalizada
-                          disabled={!isAdmin && !isCoordinator || FINALIZADOS_STATUSES.includes(row.status)}
-                        >
-                          <option value="informativo">Informativo</option>
-                          <option value="seguimiento">Seguimiento</option>
-                        </select>
+                      <div className="turno-note-meta-controls">
+                        <div className="turno-note-type-control">
+                          <label className="turno-form-label-small">Tipo:</label>
+                          <select
+                            className="turno-form-select turno-form-select--small"
+                            value={row.type || 'informativo'}
+                            onChange={(event) => handleTypeChange(row.id, event.target.value)}
+                            disabled={!hasPermissionToInteract || FINALIZADOS_STATUSES.includes(row.status)}
+                          >
+                            <option value="informativo">Informativo</option>
+                            <option value="seguimiento">Seguimiento</option>
+                          </select>
+                        </div>
+                        <div className="turno-note-priority-control">
+                          <label className="turno-form-label-small">Prioridad:</label>
+                          <select
+                            className="turno-form-select turno-form-select--small"
+                            value={row.priority || 'Media'}
+                            onChange={(event) => handlePriorityChange(row.id, event.target.value)}
+                            disabled={!hasPermissionToInteract || FINALIZADOS_STATUSES.includes(row.status)}
+                          >
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Media</option>
+                            <option value="Baja">Baja</option>
+                          </select>
+                        </div>
+                        <div className="turno-note-status-control">
+                          <label className="turno-form-label-small">Estatus:</label>
+                          {isAdmin ? (
+                            <select
+                              className="turno-form-select"
+                              value={row.status || 'Pendiente'}
+                              onChange={(event) => handleStatusChange(row.id, event.target.value)}
+                              disabled={!hasPermissionToInteract || FINALIZADOS_STATUSES.includes(row.status)}
+                            >
+                              {STATUS_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className={`turno-status-badge ${row.status?.toLowerCase().replace(' ', '-')}`}>
+                              {row.status || 'Pendiente'}
+                            </span>
+                          )}
+                        </div>
                       </div>
-
-                      <div className="d-flex align-items-center gap-2">
-                        <label className="turno-form-label">Prioridad:</label>
-                        <select
-                          className="turno-form-select turno-form-select--small"
-                          value={row.priority || 'Media'}
-                          onChange={(event) => handlePriorityChange(row.id, event.target.value)}
-                          // Bloquear si no tiene permisos O si la nota está finalizada
-                          disabled={!isAdmin && !isCoordinator || FINALIZADOS_STATUSES.includes(row.status)}
-                        >
-                          <option value="Alta">Alta</option>
-                          <option value="Media">Media</option>
-                          <option value="Baja">Baja</option>
-                        </select>
-                      </div>
-
-                      {/* Mostrar quién finalizó la nota y cuándo */}
+                      
                       {FINALIZADOS_STATUSES.includes(row.status) && (row.finalizedBy || row.finalizedAt) && (
                         <div className="turno-finalization-info">
                           <span className="turno-finalization-text">
@@ -1068,7 +1134,6 @@ const EntregaTurno = () => {
                       )}
                     </div>
 
-                    {/* Coordinators acknowledgment section */}
                     {(isAdmin || isCoordinator) && (
                       <div className="turno-acknowledgments-section">
                         <div className="turno-acknowledgments-header">
@@ -1082,11 +1147,9 @@ const EntregaTurno = () => {
                             const isChecked = row.acknowledgedBy?.[coordinator.id]?.checked || false;
                             const canInteract = isAdmin || (isCoordinator && coordinator.username?.toLowerCase() === normalizedCurrentUsername);
                             
-                            // Bloquear casillas si la nota está finalizada
                             const isNoteFinalized = FINALIZADOS_STATUSES.includes(row.status);
                             const isDisabled = !canInteract || isNoteFinalized;
                             
-                            // Usar el campo correcto para el nombre
                             const displayName = coordinator.fullName || coordinator.name || 
                               (coordinator.firstName && coordinator.lastName ? `${coordinator.firstName} ${coordinator.lastName}`.trim() : null) ||
                               coordinator.username ||
@@ -1099,93 +1162,66 @@ const EntregaTurno = () => {
                             return (
                               <div key={`coordinator-${coordinatorId}-note-${noteId}`} className="turno-acknowledgment-item">
                                 <input
-                                  key={`checkbox-${noteId}-${coordinatorId}`}
                                   type="checkbox"
                                   id={inputId}
-                                  checked={isChecked}
-                                  onChange={(e) => {
-                                    const realNoteId = row.id || row.Id || row.note?.id;
-                                    
-                                    if (!realNoteId) {
-                                      console.error('❌ ERROR: noteId es undefined!', row);
-                                      return;
-                                    }
-                                    handleCoordinatorAcknowledge(realNoteId, coordinator.id, e.target.checked);
-                                  }}
-                                  // Bloquear si no tiene permisos O si la nota está finalizada
-                                  disabled={isDisabled}
                                   className="turno-acknowledgment-checkbox"
-                                  style={{ 
-                                    cursor: isDisabled ? 'not-allowed' : 'pointer',
-                                    accentColor: isAdmin ? '#10b981' : '#3b82f6',
-                                    opacity: isDisabled ? 0.5 : 1
-                                  }}
-                                  title={
-                                    isNoteFinalized
-                                      ? 'Nota finalizada - no se pueden modificar los acknowledgments'
-                                      : isAdmin 
-                                        ? 'Administrador: puede marcar cualquier casilla'
-                                        : coordinator.username?.toLowerCase() === normalizedCurrentUsername
-                                          ? 'Puedes marcar tu casilla'
-                                          : 'Solo puedes marcar tu propia casilla'
-                                  }
+                                  checked={!!(row.acknowledgedBy?.[coordinatorId]?.checked)}
+                                  disabled={!isCoordinator || FINALIZADOS_STATUSES.includes(row.status)}
+                                  onChange={() => handleCoordinatorAcknowledge(noteId, coordinatorId, !!(row.acknowledgedBy?.[coordinatorId]?.checked))}
                                 />
-                              <label 
-                                key={`label-${noteId}-${coordinatorId}`}
-                                htmlFor={inputId}
-                                className="turno-acknowledgment-label"
-                                style={{ 
-                                  cursor: isDisabled ? 'not-allowed' : (canInteract ? 'pointer' : 'not-allowed'),
-                                  opacity: isDisabled ? 0.5 : (canInteract ? 1 : 0.6)
-                                }}
-                              >
-                                {displayName}
-                              </label>
-                            </div>
+                                <label 
+                                  htmlFor={inputId}
+                                  className="turno-acknowledgment-label"
+                                >
+                                  {displayName}
+                                </label>
+                              </div>
                             );
                           })}
                         </div>
                       </div>
                     )}
 
-                    {/* Botón de finalizar para notas de seguimiento */}
-                    {row.type === 'seguimiento' && !FINALIZADOS_STATUSES.includes(row.status) && (isAdmin || isCoordinator) && (
-                      <button
-                        type="button"
-                        className="btn-turno btn-turno--success btn-sm"
-                        onClick={() => handleStatusChange(row.id, 'Completado')}
-                      >
-                        Finalizar Seguimiento
-                      </button>
-                    )}
+                    <div className="turno-action-buttons">
+                      {row.type === 'seguimiento' && !FINALIZADOS_STATUSES.includes(row.status) && (isAdmin || isCoordinator) && (
+                        <button
+                          type="button"
+                          className="btn-turno btn-turno--success btn-sm"
+                          onClick={() => {
+                            const userName = getUserName(currentUser);
+                            handleStatusChange(row.id, 'Completado', userName);
+                          }}
+                        >
+                          Finalizar Seguimiento
+                        </button>
+                      )}
 
-                    {/* Botón de reactivar para notas finalizadas */}
-                    {activeTab === 'finalizadas' && (isAdmin || isCoordinator) && FINALIZADOS_STATUSES.includes(row.status) && (
-                      <button
-                        type="button"
-                        className="btn-turno btn-turno--primary btn-sm"
-                        onClick={() => handleStatusChange(row.id, 'Pendiente')}
-                        title={
-                          isAdmin 
-                            ? 'Administrador: puede reactivar cualquier nota'
-                            : 'Coordinador: puede reactivar notas'
-                        }
-                      >
-                        Reactivar
-                      </button>
-                    )}
+                      {activeTab === 'finalizadas' && (isAdmin || isCoordinator) && FINALIZADOS_STATUSES.includes(row.status) && (
+                        <button
+                          type="button"
+                          className="btn-turno btn-turno--primary btn-sm"
+                          onClick={() => handleStatusChange(row.id, 'Pendiente')}
+                          title={
+                            isAdmin 
+                              ? 'Administrador: puede reactivar cualquier nota'
+                              : 'Coordinador: puede reactivar notas'
+                          }
+                        >
+                          Reactivar
+                        </button>
+                      )}
 
-                    {/* Botón de eliminar para admins */}
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        className="btn-turno btn-turno--danger btn-sm"
-                        onClick={() => handleDeleteNote(row.id)}
-                        disabled={deletingNoteIds.has(row.id)}
-                      >
-                        {deletingNoteIds.has(row.id) ? 'Eliminando...' : 'Eliminar'}
-                      </button>
-                    )}
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          className="btn-turno btn-turno--danger btn-sm"
+                          onClick={() => handleDeleteNote(row.id)}
+                          disabled={deletingNoteIds.has(row.id)}
+                        >
+                          {deletingNoteIds.has(row.id) ? 'Eliminando...' : 'Eliminar'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1193,14 +1229,13 @@ const EntregaTurno = () => {
           )}
         </div>
 
-        {/* Modal para crear nota */}
         <ModernModal
           show={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           title="Nueva nota de entrega de turno"
           onSubmit={handleCreateNote}
           submitText="Crear nota"
-          submitDisabled={!newNoteDescription.trim()}
+          submitDisabled={!newNoteTitle.trim() || !newNoteDescription.trim() || !newNotePriority.trim()}
           loading={creatingNote}
         >
           {createModalError && (
@@ -1208,6 +1243,32 @@ const EntregaTurno = () => {
               {createModalError}
             </div>
           )}
+
+          <div className="modern-form-group">
+            <label className="modern-form-label">Título de la nota *</label>
+            <input
+              type="text"
+              className="modern-form-input"
+              placeholder="Título breve y claro de la nota..."
+              value={newNoteTitle}
+              onChange={(e) => setNewNoteTitle(e.target.value)}
+              disabled={creatingNote}
+            />
+          </div>
+
+          <div className="modern-form-group">
+            <label className="modern-form-label">Prioridad *</label>
+            <select
+              className="modern-form-select"
+              value={newNotePriority}
+              onChange={(e) => setNewNotePriority(e.target.value)}
+              disabled={creatingNote}
+            >
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
 
           <div className="modern-form-group">
             <label className="modern-form-label">Descripción de la nota *</label>

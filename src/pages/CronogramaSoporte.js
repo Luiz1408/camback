@@ -159,7 +159,7 @@ const CronogramaSoporte = () => {
     });
   };
 
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = currentUser?.role === 'Administrador';
   const displayName = currentUser?.displayName || currentUser?.username || 'usuario';
 
   if (loading) {
@@ -168,8 +168,8 @@ const CronogramaSoporte = () => {
         <MainNavbar
           displayName={displayName}
           role={currentUser?.role}
-          isAdmin={isAdmin}
-          onManageUsers={isAdmin ? openUserManagementModal : undefined}
+          isAdmin={currentUser?.role === 'Administrador'}
+          onManageUsers={currentUser?.role === 'Administrador' ? openUserManagementModal : undefined}
           onLogout={logout}
         />
         <div className="cronograma-soporte-container">
@@ -187,8 +187,8 @@ const CronogramaSoporte = () => {
       <MainNavbar
         displayName={displayName}
         role={currentUser?.role}
-        isAdmin={isAdmin}
-        onManageUsers={isAdmin ? openUserManagementModal : undefined}
+        isAdmin={currentUser?.role === 'Administrador'}
+        onManageUsers={currentUser?.role === 'Administrador' ? openUserManagementModal : undefined}
         onLogout={logout}
       />
       

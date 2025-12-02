@@ -499,8 +499,8 @@ const RevisionesEntregadas = () => {
       <MainNavbar
         displayName={displayName || currentUser?.username || ''}
         role={currentUser?.role}
-        isAdmin={isAdmin}
-        onManageUsers={isAdmin ? openUserManagementModal : undefined}
+        isAdmin={currentUser?.role === 'Administrador'}
+        onManageUsers={currentUser?.role === 'Administrador' ? openUserManagementModal : undefined}
         onLogout={logout}
       />
 
