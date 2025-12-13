@@ -515,33 +515,31 @@ const PlaneacionTecnica = () => {
 
         {showCreateModal && (
           <>
-            <div className="modal-backdrop fade show" />
-            <div className="modal fade show d-block" role="dialog" aria-modal="true">
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Registrar nueva actividad técnica</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => {
-                        if (creatingActivity) {
-                          return;
-                        }
-                        setShowCreateModal(false);
-                        setFormError('');
-                        resetForm();
-                      }}
-                      aria-label="Cerrar"
-                      disabled={creatingActivity}
-                    />
-                  </div>
+            <div className="password-modal-backdrop" />
+            <div className="password-modal">
+              <div className="card-header border-0">
+                <h5 className="mb-0">Registrar nueva actividad técnica</h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => {
+                    if (creatingActivity) {
+                      return;
+                    }
+                    setShowCreateModal(false);
+                    setFormError('');
+                    resetForm();
+                  }}
+                  aria-label="Cerrar"
+                  disabled={creatingActivity}
+                />
+              </div>
                   <form
                     onSubmit={(event) => {
                       handleCreateActivity(event);
                     }}
                   >
-                    <div className="modal-body">
+                    <div className="card-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                       <div className="mb-3">
                         <label htmlFor="modal-activity-description" className="form-label fw-semibold">
                           Descripción de la actividad
@@ -606,98 +604,136 @@ const PlaneacionTecnica = () => {
                         <small className="text-muted">Estas notas se mostrarán cuando la actividad esté pendiente o no realizada.</small>
                       </div>
                       {formError && (
-                        <div className="alert alert-danger" role="alert">
-                          {formError}
-                        </div>
-                      )}
-                    </div>
-                    <div className="modal-footer">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={() => {
-                          if (creatingActivity) {
-                            return;
-                          }
-                          setShowCreateModal(false);
-                          setFormError('');
-                          resetForm();
-                        }}
                         disabled={creatingActivity}
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        disabled={creatingActivity}
-                      >
-                        {creatingActivity ? 'Registrando…' : 'Registrar actividad'}
-                      </button>
+                        required
+                      />
                     </div>
-                  </form>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label fw-semibold">Fecha de fin</label>
+                      <DatePicker
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate}
+                        className="form-control"
+                        placeholderText="Selecciona fecha de fin"
+                        dateFormat="dd/MM/yyyy"
+                        disabled={creatingActivity}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="modal-activity-notes" className="form-label fw-semibold">
+                      Notas adicionales (opcional)
+                    </label>
+                    <textarea
+                      id="modal-activity-notes"
+                      className="form-control"
+                      rows={3}
+                      placeholder="Notas de seguimiento, recursos necesarios, contactos, etc."
+                      value={notes}
+                      onChange={(event) => setNotes(event.target.value)}
+                      disabled={creatingActivity}
+                    />
+                    <small className="text-muted">Estas notas se mostrarán cuando la actividad esté pendiente o no realizada.</small>
+                  </div>
+                  {formError && (
+                    <div className="alert alert-danger" role="alert">
+                      {formError}
+                    </div>
+                  )}
                 </div>
-              </div>
+                <div className="card-footer border-0 bg-transparent">
+                  <button
+                    type="button"
+                    className="btn btn-secondary me-2"
+                    onClick={() => {
+                      if (creatingActivity) {
+                        return;
+                      }
+                      setShowCreateModal(false);
+                      setFormError('');
+                      resetForm();
+                    }}
+                    disabled={creatingActivity}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={creatingActivity}
+                  >
+                    {creatingActivity ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Creando...
+                      </>
+                    ) : (
+                      'Crear actividad'
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
-          </>
+          </div>
         )}
       {deleteModalState.isOpen && (
           <>
-            <div className="modal-backdrop fade show" />
-            <div className="modal fade show d-block" role="dialog" aria-modal="true">
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Eliminar actividad técnica</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={handleCloseDeleteModal}
-                      aria-label="Cerrar"
-                      disabled={deleteModalState.loading}
-                    />
+            <div className="password-modal-backdrop" />
+            <div className="password-modal">
+              <div className="card-header border-0">
+                <h5 className="mb-0">Eliminar actividad técnica</h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={handleCloseDeleteModal}
+                  aria-label="Cerrar"
+                  disabled={deleteModalState.loading}
+                />
+              </div>
+              <div className="card-body">
+                <p className="mb-3">
+                  ¿Deseas eliminar la actividad registrada el{' '}
+                  <strong>
+                    {deleteModalState.activity?.createdAt
+                      ? formatDateTime(deleteModalState.activity.createdAt)
+                      : '—'}
+                  </strong>
+                  ? Esta acción no se puede deshacer.
+                </p>
+                {deleteModalState.activity?.description && (
+                  <div className="bg-light rounded p-3 mb-3">
+                    <p className="small text-muted mb-1">Actividad:</p>
+                    <p className="small mb-0">{deleteModalState.activity.description}</p>
                   </div>
-                  <div className="modal-body">
-                    <p className="mb-3">
-                      ¿Deseas eliminar la actividad registrada el{' '}
-                      <strong>
-                        {deleteModalState.activity?.createdAt
-                          ? formatDateTime(deleteModalState.activity.createdAt)
-                          : '—'}
-                      </strong>
-                      ? Esta acción no se puede deshacer.
-                    </p>
-                    {deleteModalState.activity?.description && (
-                      <div className="bg-light rounded p-3 mb-3">
-                        <p className="small text-muted mb-1">Actividad:</p>
-                        <p className="small mb-0">{deleteModalState.activity.description}</p>
-                      </div>
-                    )}
-                    {deleteModalState.error && (
-                      <div className="alert alert-danger" role="alert">
-                        {deleteModalState.error}
-                      </div>
-                    )}
+                )}
+                {deleteModalState.error && (
+                  <div className="alert alert-danger" role="alert">
+                    {deleteModalState.error}
                   </div>
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={handleCloseDeleteModal}
-                      disabled={deleteModalState.loading}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={handleConfirmDelete}
-                      disabled={deleteModalState.loading}
-                    >
-                      {deleteModalState.loading ? 'Eliminando…' : 'Eliminar actividad'}
-                    </button>
-                  </div>
-                </div>
+                )}
+              </div>
+              <div className="card-footer border-0 bg-transparent">
+                <button
+                  type="button"
+                  className="btn btn-secondary me-2"
+                  onClick={handleCloseDeleteModal}
+                  disabled={deleteModalState.loading}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleConfirmDelete}
+                  disabled={deleteModalState.loading}
+                >
+                  {deleteModalState.loading ? 'Eliminando…' : 'Eliminar actividad'}
+                </button>
               </div>
             </div>
           </>

@@ -783,10 +783,16 @@ const EntregaTurno = () => {
                                 id={`assigned-coordinator-${row.id}`}
                                 className="form-select form-select-sm"
                                 value={row.assignedCoordinatorId ?? ''}
-                  </span>
-                  <span className="badge bg-primary-subtle text-primary-emphasis">
-                    Enterados: {acknowledgedSummary.totalAcknowledged}
-                    {acknowledgedSummary.totalPossible > 0
+                                onChange={(event) => handleCoordinatorChange(row.id, event.target.value)}
+                                disabled={!canManageNotes || row.status === 'Finalizada'}
+                              >
+                                <option value="">Sin asignar</option>
+                                {availableCoordinators.map((coordinator) => (
+                                  <option key={coordinator.id} value={coordinator.id}>
+                                    {coordinator.name}
+                                  </option>
+                                ))}
+                              </select>
                       ? ` / ${acknowledgedSummary.totalPossible}`
                       : ''}
                   </span>
@@ -961,27 +967,15 @@ const EntregaTurno = () => {
                     </tbody>
                   </table>
                 </div>
-              </>
-            )}
-          </div>
-        </div>
-        {deleteModalState.isOpen && (
-          <>
-            <div className="modal-backdrop fade show" />
-            <div className="modal fade show d-block" role="dialog" aria-modal="true">
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Eliminar nota</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={handleCloseDeleteModal}
-                      aria-label="Cerrar"
-                      disabled={deleteModalState.loading}
-                    />
-                  </div>
-                  <div className="modal-body">
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={handleCloseDeleteModal}
+                  aria-label="Cerrar"
+                  disabled={deleteModalState.loading}
+                />
+              </div>
+              <div className="card-body">
                     <p className="mb-3">
                       ¿Deseas eliminar la nota registrada el{' '}
                       <strong>
@@ -1003,10 +997,10 @@ const EntregaTurno = () => {
                       </div>
                     )}
                   </div>
-                  <div className="modal-footer">
+                  <div className="card-footer border-0 bg-transparent">
                     <button
                       type="button"
-                      className="btn btn-outline-secondary"
+                      className="btn btn-secondary me-2"
                       onClick={handleCloseDeleteModal}
                       disabled={deleteModalState.loading}
                     >
@@ -1029,91 +1023,83 @@ const EntregaTurno = () => {
 
         {showCreateModal && (
           <>
-            <div className="modal-backdrop fade show" />
-            <div
-              className="modal fade show d-block"
-              role="dialog"
-              aria-modal="true"
-            >
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Nueva nota de entrega de turno</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={handleCloseCreateModal}
-                      aria-label="Cerrar"
+            <div className="password-modal-backdrop" />
+            <div className="password-modal">
+              <div className="card-header border-0">
+                <h5 className="mb-0">Nueva nota de entrega de turno</h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={handleCloseCreateModal}
+                  aria-label="Cerrar"
+                  disabled={creatingNote}
+                />
+              </div>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  handleCreateNoteSubmit();
+                }}
+              >
+                <div className="card-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                  <div className="mb-3">
+                    <label htmlFor="create-note-description" className="form-label">
+                      Descripción de la nota
+                    </label>
+                    <textarea
+                      id="create-note-description"
+                      className="form-control"
+                      rows={4}
+                      placeholder="Describe la incidencia o información del turno"
+                      value={newNoteDescription}
+                      onChange={(event) => setNewNoteDescription(event.target.value)}
                       disabled={creatingNote}
+                      required
                     />
                   </div>
-                  <form
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      handleCreateNoteSubmit();
-                    }}
-                  >
-                    <div className="modal-body">
-                      <div className="mb-3">
-                        <label htmlFor="create-note-description" className="form-label">
-                          Descripción de la nota
-                        </label>
-                        <textarea
-                          id="create-note-description"
-                          className="form-control"
-                          rows={4}
-                          placeholder="Describe la incidencia o información del turno"
-                          value={newNoteDescription}
-                          onChange={(event) => setNewNoteDescription(event.target.value)}
-                          disabled={creatingNote}
-                          required
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="create-note-coordinator" className="form-label">
-                          Coordinador asignado (opcional)
-                        </label>
-                        <select
-                          id="create-note-coordinator"
-                          className="form-select"
-                          value={newNoteCoordinatorId}
-                          onChange={(event) => setNewNoteCoordinatorId(event.target.value)}
-                          disabled={creatingNote}
-                        >
-                          <option value="">Sin asignar</option>
-                          {coordinatorOptions.map((coord) => (
-                            <option key={`create-modal-coord-${coord.id}`} value={coord.id}>
-                              {coord.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      {createModalError && (
-                        <div className="alert alert-danger" role="alert">
-                          {createModalError}
-                        </div>
-                      )}
+                  <div className="mb-3">
+                    <label htmlFor="create-note-coordinator" className="form-label">
+                      Coordinador asignado (opcional)
+                    </label>
+                    <select
+                      id="create-note-coordinator"
+                      className="form-select"
+                      value={newNoteCoordinatorId}
+                      onChange={(event) => setNewNoteCoordinatorId(event.target.value)}
+                      disabled={creatingNote}
+                    >
+                      <option value="">Sin asignar</option>
+                      {coordinatorOptions.map((coord) => (
+                        <option key={`create-modal-coord-${coord.id}`} value={coord.id}>
+                          {coord.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {createModalError && (
+                    <div className="alert alert-danger" role="alert">
+                      {createModalError}
                     </div>
-                    <div className="modal-footer">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={handleCloseCreateModal}
-                        disabled={creatingNote}
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        disabled={creatingNote}
-                      >
-                        {creatingNote ? 'Creando…' : 'Crear nota'}
-                      </button>
-                    </div>
-                  </form>
+                  )}
                 </div>
-              </div>
+                <div className="card-footer border-0 bg-transparent">
+                  <button
+                    type="button"
+                    className="btn btn-secondary me-2"
+                    onClick={handleCloseCreateModal}
+                    disabled={creatingNote}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={creatingNote}
+                  >
+                    {creatingNote ? 'Creando…' : 'Crear nota'}
+                  </button>
+                </div>
+              </form>
             </div>
           </>
         )}

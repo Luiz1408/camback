@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import MainNavbar from '../components/Layout/MainNavbar';
 import Footer from '../components/Layout/Footer';
+import { useAuth } from '../contexts/AuthContext';
 import { useUserManagement } from '../contexts/UserManagementContext';
 import { dashboardService } from '../services/dashboard';
+import { formatUserName } from '../utils/formatUserName';
 import './Dashboard.css';
+import '../styles/responsive.css';
 
 const CORPORATE_INFO = {
   values: [
@@ -45,7 +47,8 @@ const Dashboard = () => {
   });
 
   const isAdmin = currentUser?.role === 'Administrador';
-  const displayName = currentUser?.displayName;
+  
+  const displayName = formatUserName(currentUser);
   
   const handleManageUsers = () => {
     openUserManagementModal();
@@ -53,6 +56,7 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     logout();
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -81,7 +85,7 @@ const Dashboard = () => {
         onLogout={handleLogout}
       />
 
-      <main className="container py-5">
+      <main className="main-content py-5">
         {/* Hero Section */}
         <section className="dashboard-card mb-4">
           <div className="row align-items-center">

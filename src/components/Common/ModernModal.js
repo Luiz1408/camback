@@ -13,37 +13,41 @@ const ModernModal = ({
   if (!show) return null;
 
   return (
-    <div className="modern-modal-overlay">
-      <div className="modern-modal">
-        <div className="modern-modal__header">
-          <h2 className="modern-modal__title">{title}</h2>
+    <div className="password-modal-backdrop">
+      <div className="card password-modal shadow-lg border-0">
+        <div className="card-header border-0">
+          <h5 className="mb-0">{title}</h5>
           <button 
-            className="modern-modal__close"
+            className="btn-close btn-close-white"
             onClick={onClose}
             disabled={loading}
-          >
-            ×
-          </button>
+            aria-label="Cerrar"
+          />
         </div>
         
-        <div className="modern-modal__body">
+        <div className="card-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
           {children}
         </div>
         
-        <div className="modern-modal__footer">
+        <div className="card-footer border-0 bg-transparent">
           <button
-            className="btn-modern btn-modern--secondary"
+            className="btn btn-secondary me-2"
             onClick={onClose}
             disabled={loading}
           >
             Cancelar
           </button>
           <button
-            className="btn-modern btn-modern--primary"
+            className="btn btn-primary"
             onClick={onSubmit}
             disabled={submitDisabled || loading}
           >
-            {loading ? 'Procesando...' : submitText}
+            {loading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Procesando...
+              </>
+            ) : submitText}
           </button>
         </div>
       </div>

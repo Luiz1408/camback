@@ -5,10 +5,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import RevisionesEntregadas from './pages/RevisionesEntregadas';
+import CapturaRevisiones from './pages/CapturaRevisiones';
 import Charts from './pages/Charts';
 import EntregaTurno from './pages/EntregaTurno';
 import PlaneacionTecnica from './pages/PlaneacionTecnica';
 import CronogramaSoporte from './pages/CronogramaSoporte';
+import AdminCatalogos from './components/AdminCatalogos';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -30,6 +32,14 @@ function App() {
             element={
               <PrivateRoute>
                 <RevisionesEntregadas />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/captura-revisiones"
+            element={
+              <PrivateRoute>
+                <CapturaRevisiones />
               </PrivateRoute>
             }
           />
@@ -65,7 +75,15 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="/admin-catalogos"
+            element={
+              <PrivateRoute>
+                <AdminCatalogos />
+              </PrivateRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
         <ToastContainer
           position="top-right"

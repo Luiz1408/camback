@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TruperBack")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4522c88693ae5423238f9eeb27284c66c2ff3228")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+744685e7d5def9bcbe0c211ff1647e86dfc9e489")]
 [assembly: System.Reflection.AssemblyProductAttribute("TruperBack")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TruperBack")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

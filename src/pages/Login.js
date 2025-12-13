@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from '../components/Layout/Footer';
 import './Login.css';
+import '../styles/responsive.css';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -223,95 +224,22 @@ const Login = () => {
 
       {isRegisterOpen && (
         <div className="register-modal-backdrop">
-          <div className="card register-modal shadow-lg border-0">
-            <div className="card-header d-flex align-items-center justify-content-between">
+          <div className="card register-modal shadow-lg border-0 recovery-modal text-center">
+            <div className="card-header d-flex align-items-center justify-content-between recovery-modal__header">
               <h3 className="mb-0">Crear nuevo usuario</h3>
               <button type="button" className="btn-close" onClick={handleCloseRegister} aria-label="Cerrar" />
             </div>
-            <form onSubmit={handleRegister} className="card-body">
-              {registerError && (
-                <div className="alert alert-danger" role="alert">
-                  {registerError}
-                </div>
-              )}
-              <div className="row g-3">
-                <div className="col-12 col-md-6">
-                  <label className="form-label" htmlFor="firstName">
-                    Nombre
-                  </label>
-                  <input
-                    id="firstName"
-                    type="text"
-                    value={registerData.firstName}
-                    onChange={handleRegisterChange('firstName')}
-                    className="form-control"
-                    required
-                  />
-                </div>
-                <div className="col-12 col-md-6">
-                  <label className="form-label" htmlFor="lastName">
-                    Apellido
-                  </label>
-                  <input
-                    id="lastName"
-                    type="text"
-                    value={registerData.lastName}
-                    onChange={handleRegisterChange('lastName')}
-                    className="form-control"
-                    required
-                  />
-                </div>
-                <div className="col-12 col-md-6">
-                  <label className="form-label" htmlFor="registerUsername">
-                    Usuario
-                  </label>
-                  <input
-                    id="registerUsername"
-                    type="text"
-                    value={registerData.username}
-                    onChange={handleRegisterChange('username')}
-                    className="form-control"
-                    required
-                  />
-                </div>
-                <div className="col-12 col-md-6">
-                  <label className="form-label" htmlFor="registerRole">
-                    Rol
-                  </label>
-                  <select
-                    id="registerRole"
-                    value={registerData.roleId}
-                    onChange={handleRegisterChange('roleId')}
-                    className="form-select"
-                  >
-                    <option value="2">Coordinador</option>
-                    <option value="3">Monitorista</option>
-                    <option value="4">Técnico</option>
-                  </select>
-                </div>
-                <div className="col-12 col-md-6">
-                  <label className="form-label" htmlFor="registerPassword">
-                    Contraseña
-                  </label>
-                  <input
-                    id="registerPassword"
-                    type="password"
-                    value={registerData.password}
-                    onChange={handleRegisterChange('password')}
-                    className="form-control"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="d-flex justify-content-end gap-2 mt-4">
-                <button type="button" className="btn btn-outline-secondary" onClick={handleCloseRegister}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={registerLoading}>
-                  {registerLoading ? 'Registrando...' : 'Registrar'}
-                </button>
-              </div>
-            </form>
+            <div className="card-body recovery-modal__body">
+              <p className="recovery-modal__description">
+                Por seguridad, la creación de usuarios se gestiona manualmente.
+              </p>
+              <p className="recovery-modal__callout">
+                Contacta al administrador del sistema para solicitar una nueva cuenta.
+              </p>
+              <button type="button" className="btn recovery-modal__button" onClick={handleCloseRegister}>
+                Entendido
+              </button>
+            </div>
           </div>
         </div>
       )}

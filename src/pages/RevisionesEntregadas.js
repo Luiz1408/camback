@@ -1,12 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import api from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import { useUserManagement } from '../contexts/UserManagementContext';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import MainNavbar from '../components/Layout/MainNavbar';
 import Footer from '../components/Layout/Footer';
-import useDashboardFilters from '../hooks/useDashboardFilters';
+import RevisionFormModal from '../components/RevisionFormModal';
+import { useAuth } from '../contexts/AuthContext';
+import { useUserManagement } from '../contexts/UserManagementContext';
 import { useToast } from '../contexts/ToastContext';
+import useDashboardFilters from '../hooks/useDashboardFilters';
+import api from '../services/api';
+import { formatUserName } from '../utils/formatUserName';
+import { crearFolio, getRevisiones, getDetecciones } from '../services/folios';
 import './RevisionesEntregadas.css';
+import '../styles/responsive.css';
 
 const normalizeHeaderKey = (rawKey) =>
   (rawKey ?? '')
@@ -168,18 +174,17 @@ const RevisionesEntregadas = () => {
   const { openModal: openUserManagementModal } = useUserManagement();
   const { addToast } = useToast();
 
-  const [uploadType, setUploadType] = useState('detecciones');
-  const [excelData, setExcelData] = useState([]);
-  const [formattedData, setFormattedData] = useState([]);
-  const [uploadStatus, setUploadStatus] = useState({ type: 'info', message: '' });
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [formattedData, setFormattedData] = useState([]);
   const [tableHeaders, setTableHeaders] = useState(DEFAULT_TABLE_HEADERS);
   const [selectedRows, setSelectedRows] = useState([]);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(25);
   const [totalRecords, setTotalRecords] = useState(0);
-  const fileInputRef = useRef(null);
   const [deletingAll, setDeletingAll] = useState(false);
 
   const {
@@ -205,160 +210,151 @@ const RevisionesEntregadas = () => {
     return ['administrator', 'administrador', 'admin'].includes(normalizedRole);
   }, [currentUser]);
 
-  const displayName = useMemo(() => {
-    if (!currentUser) {
-      return '';
-    }
+  const displayName = formatUserName(currentUser);
 
-    const rawFirstName = (currentUser.firstName || '')
-      .split(' ')
-      .map((part) => part.trim())
-      .filter(Boolean)[0];
-    const rawLastName = (currentUser.lastName || '')
-      .split(' ')
-      .map((part) => part.trim())
-      .filter(Boolean)[0];
-
-    if (rawFirstName || rawLastName) {
-      return [rawFirstName, rawLastName].filter(Boolean).join(' ');
-    }
-
-    return currentUser.fullName || currentUser.username || '';
-  }, [currentUser]);
-
-  const fetchExcelData = useCallback(
-    async (pageNumber = 1, typeOverride) => {
+  // Carga de datos para la tabla - DEFINIDAS PRIMERO
+  const fetchRevisiones = useCallback(async () => {
+    try {
       setLoading(true);
-      setError('');
-
-      try {
-        const params = {
-          page: pageNumber,
-          pageSize,
-        };
-
-        const effectiveType = typeOverride ?? filterType;
-        if (effectiveType && effectiveType !== 'all') {
-          params.tipo = effectiveType;
+      const revisiones = await getRevisiones();
+      
+      // Formatear datos para la tabla
+      const formatted = revisiones.map(revision => ({
+        id: revision.id,
+        data: {
+          folio1: revision.folio1,
+          folio2: revision.folio2,
+          acumulado: revision.acumulado,
+          fechaEnvio: revision.fechaEnvio,
+          almacen: revision.almacen,
+          indicador: revision.indicador,
+          subindicador: revision.subindicador,
+          monitorista: revision.monitorista,
+          coordinadorEnTurno: revision.coordinadorEnTurno,
+          observaciones: revision.observaciones,
+          mes: revision.mes,
+          fechaSolicitud: revision.fechaSolicitud,
+          fechaIncidente: revision.fechaIncidente,
+          monto: revision.monto,
+          comentarioGeneral: revision.comentarioGeneral,
+          areaCargo: revision.areaCargo,
+          areaSolicita: revision.areaSolicita,
+          puesto: revision.puesto,
+          codigo: revision.codigo,
+          tiempo: revision.tiempo,
+          ticket: revision.ticket,
+          personalInvolucrado: revision.personalInvolucrado,
+          no: revision.no,
+          nomina: revision.nomina,
+          lineaEmpresaPlacas: revision.lineaEmpresaPlacas,
+          ubicacion2: revision.ubicacion2,
+          areaEspecifica: revision.areaEspecifica,
+          turnoOperativo: revision.turnoOperativo,
+          situacion: revision.situacion,
+          quienEnvia: revision.quienEnvia,
+          fechaCreacion: revision.fechaCreacion
         }
-
-        if (filterAlmacen) params.almacen = filterAlmacen;
-        if (filterMonitorista) params.persona = filterMonitorista;
-        if (filterCoordinador) params.coordinador = filterCoordinador;
-        if (filterFechaEnvio) params.fechaEnvio = filterFechaEnvio;
-
-        const response = await api.get('/upload/uploaded-data', { params });
-        const { data = [], totalRecords: total = 0 } = response.data || {};
-
-        if (!Array.isArray(data)) {
-          setExcelData([]);
-          setTotalRecords(0);
-          setFormattedData([]);
-          setTableHeaders(DEFAULT_TABLE_HEADERS);
-          return;
-        }
-
-        setExcelData(data);
-        setTotalRecords(total);
-
-        const firstRow = data[0]?.data ?? {};
-        setTableHeaders(buildTableHeadersFromRow(firstRow));
-      } catch (err) {
-        const message =
-          err?.response?.data?.message ??
-          err?.response?.data ??
-          err?.message ??
-          'Error al cargar los datos.';
-        setError(typeof message === 'string' ? message : 'Error al cargar los datos.');
-        setExcelData([]);
-        setTotalRecords(0);
-        setFormattedData([]);
-        setTableHeaders(DEFAULT_TABLE_HEADERS);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [filterType, filterAlmacen, filterMonitorista, filterCoordinador, filterFechaEnvio, pageSize]
-  );
-
-  const formatUploadedData = useCallback((rawData) => {
-    if (!Array.isArray(rawData)) {
-      return [];
+      }));
+      
+      setFormattedData(formatted);
+      setTotalRecords(formatted.length);
+    } catch (err) {
+      const message = err?.response?.data?.message ?? err?.message ?? 'Error al obtener revisiones';
+      addToast({ type: 'error', message });
+      setFormattedData([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
     }
+  }, [addToast]);
 
-    return rawData.map((item, index) => {
-      const payload = item?.data ?? {};
-      const normalizedData = {};
-
-      Object.entries(payload).forEach(([key, value]) => {
-        const normalizedKey = normalizeHeaderKey(key);
-        if (normalizedKey && !Object.prototype.hasOwnProperty.call(normalizedData, normalizedKey)) {
-          normalizedData[normalizedKey] = value;
+  const fetchDetecciones = useCallback(async () => {
+    try {
+      setLoading(true);
+      const detecciones = await getDetecciones();
+      
+      // Formatear datos para la tabla
+      const formatted = detecciones.map(deteccion => ({
+        id: deteccion.id,
+        data: {
+          folio1: deteccion.folio1,
+          folio2: deteccion.folio2,
+          acumulado: deteccion.acumulado,
+          fechaEnvio: deteccion.fechaEnvio,
+          sucursal: deteccion.sucursal,
+          codigo: deteccion.codigo,
+          indicador: deteccion.indicador,
+          subindicador: deteccion.subindicador,
+          monitorista: deteccion.monitorista,
+          coordinadorEnTurno: deteccion.coordinadorEnTurno,
+          puesto: deteccion.puesto,
+          puestoColaborador: deteccion.puestoColaborador,
+          folioAsignado1: deteccion.folioAsignado1,
+          ubicacionSucursal: deteccion.ubicacionSucursal,
+          generaImpacto: deteccion.generaImpacto,
+          folioAsignado2: deteccion.folioAsignado2,
+          colaboradorInvolucrado: deteccion.colaboradorInvolucrado,
+          lineaEmpresa: deteccion.lineaEmpresa,
+          supervisorJefeTurno: deteccion.supervisorJefeTurno,
+          situacionDescripcion: deteccion.situacionDescripcion,
+          enviaReporte: deteccion.enviaReporte,
+          retroalimentacion: deteccion.retroalimentacion,
+          ubicacion: deteccion.ubicacion,
+          almacen: deteccion.almacen,
+          hora: deteccion.hora,
+          no: deteccion.no,
+          nomina: deteccion.nomina,
+          areaEspecifica: deteccion.areaEspecifica,
+          turnoOperativo: deteccion.turnoOperativo,
+          fechaCreacion: deteccion.fechaCreacion
         }
+      }));
+      
+      setFormattedData(formatted);
+      setTotalRecords(formatted.length);
+    } catch (err) {
+      const message = err?.response?.data?.message ?? err?.message ?? 'Error al obtener detecciones';
+      addToast({ type: 'error', message });
+      setFormattedData([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [addToast]);
+
+  const handleFormSubmit = useCallback(async (formData) => {
+    setFormLoading(true);
+    
+    try {
+      const response = await api.post('/revisiones/crear-folio', formData);
+      
+      addToast({ 
+        type: 'success', 
+        message: 'Folio creado correctamente.' 
       });
+      
+      setShowFormModal(false);
+      fetchRevisiones(page, filterType);
+      fetchDetecciones(page, filterType);
+      fetchFilterOptions(filterType);
+    } catch (err) {
+      const message = err?.response?.data?.message ?? err?.message ?? 'Error al crear el folio.';
+      addToast({ 
+        type: 'error', 
+        message 
+      });
+    } finally {
+      setFormLoading(false);
+    }
+  }, [addToast, fetchRevisiones, fetchDetecciones, page, filterType, fetchFilterOptions]);
 
-      const rowId = item?.id ?? item?.Id ?? index + 1;
-      const rowIndex = item?.rowIndex ?? item?.RowIndex ?? item?.row_index ?? index + 1;
-      const uploadType = item?.uploadType ?? item?.UploadType ?? item?.tipo ?? 'desconocido';
+  const handleOpenFormModal = () => {
+    setShowFormModal(true);
+  };
 
-      return {
-        rowId,
-        rowIndex,
-        uploadType,
-        data: payload,
-        normalizedData,
-      };
-    });
-  }, []);
-
-  const handleUploadExcel = useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-      if (!file) {
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('tipo', uploadType);
-
-      setUploadStatus({ type: 'info', message: '' });
-      setLoading(true);
-
-      try {
-        const response = await api.post('/upload/upload-excel', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          params: {
-            tipo: uploadType,
-          },
-        });
-
-        const message = response?.data?.message ?? response?.data?.Message ?? 'Archivo subido correctamente.';
-        setUploadStatus({ type: 'success', message });
-        addToast({ type: 'success', message });
-        fetchExcelData(page, filterType);
-        fetchFilterOptions(filterType);
-      } catch (err) {
-        const message =
-          err?.response?.data?.message ??
-          err?.response?.data ??
-          err?.message ??
-          'Error al subir el archivo.';
-
-        const formattedMessage = typeof message === 'string' ? message : 'Error al subir el archivo.';
-        setUploadStatus({ type: 'danger', message: formattedMessage });
-        addToast({ type: 'error', message: formattedMessage });
-      } finally {
-        setLoading(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }
-    },
-    [uploadType, fetchExcelData, page, filterType, fetchFilterOptions, addToast]
-  );
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+  };
 
   const handleDeleteSelected = useCallback(async () => {
     if (selectedRows.length === 0) {
@@ -379,7 +375,8 @@ const RevisionesEntregadas = () => {
       });
       addToast({ type: 'success', message: 'Registros eliminados correctamente.' });
       setSelectedRows([]);
-      fetchExcelData(page, filterType);
+      fetchRevisiones(page, filterType);
+      fetchDetecciones(page, filterType);
     } catch (err) {
       const message =
         err?.response?.data?.message ??
@@ -392,7 +389,86 @@ const RevisionesEntregadas = () => {
         message: typeof message === 'string' ? message : 'Error al eliminar los registros seleccionados.',
       });
     }
-  }, [selectedRows, fetchExcelData, page, filterType, addToast]);
+  }, [selectedRows, fetchRevisiones, fetchDetecciones, page, filterType, addToast]);
+
+  const handleCreateFolio = useCallback(async (formData) => {
+    try {
+      setFormLoading(true);
+      
+      // Preparar datos según el tipo
+      const folioData = {
+        tipo: formData.tipo,
+        fechaEnvio: formData.fechaEnvio,
+        hora: formData.hora ? `${formData.hora}:00` : null,
+        indicador: formData.indicador,
+        subindicador: formData.subindicador,
+        monitorista: formData.monitorista,
+        puesto: formData.puesto,
+        
+        // Campos específicos según tipo
+        ...(formData.tipo === 'revision' ? {
+          almacen: formData.almacen,
+          observaciones: formData.observaciones,
+          mes: formData.mes,
+          fechaSolicitud: formData.fechaSolicitud,
+          fechaIncidente: formData.fechaIncidente,
+          monto: formData.monto,
+          codigo: formData.codigo,
+          comentarioGeneral: formData.comentarioGeneral,
+          areaCargo: formData.areaCargo,
+          tiempo: formData.tiempo,
+          ticket: formData.ticket,
+          foliosAsignado1: formData.folioAsignado1,
+          foliosAsignado2: formData.folioAsignado2,
+          personalInvolucrado: formData.personalInvolucrado,
+          no: formData.no,
+          nomina: formData.nomina,
+          lineaEmpresaPlacas: formData.lineaEmpresaPlacas,
+          ubicacion2: formData.ubicacion2,
+          areaEspecifica: formData.areaEspecifica,
+          turnoOperativo: formData.turnoOperativo,
+          situacion: formData.situacion,
+          quienEnvia: formData.quienEnvia
+        } : {
+          sucursal: formData.sucursal,
+          codigo: formData.codigo,
+          folioAsignado1: formData.folioAsignado1,
+          ubicacionSucursal: formData.ubicacionSucursal,
+          puestoColaborador: formData.puestoColaborador,
+          generaImpacto: formData.generaImpacto,
+          folioAsignado2: formData.folioAsignado2,
+          colaboradorInvolucrado: formData.colaboradorInvolucrado,
+          lineaEmpresa: formData.lineaEmpresa,
+          supervisorJefeTurno: formData.supervisorJefeTurno,
+          situacionDescripcion: formData.situacionDescripcion,
+          enviaReporte: formData.enviaReporte,
+          retroalimentacion: formData.retroalimentacion
+        })
+      };
+
+      const response = await crearFolio(folioData);
+      
+      addToast({ 
+        type: 'success', 
+        message: `Folio creado exitosamente: ${response.folio.folio1}-${response.folio.folio2} (Acumulado: ${response.folio.acumulado})` 
+      });
+      
+      setShowFormModal(false);
+      
+      // Recargar datos según el tipo
+      if (formData.tipo === 'revision') {
+        fetchRevisiones();
+      } else {
+        fetchDetecciones();
+      }
+      
+    } catch (err) {
+      const message = err?.response?.data?.message ?? err?.message ?? 'Error al crear folio';
+      addToast({ type: 'error', message });
+    } finally {
+      setFormLoading(false);
+    }
+  }, [addToast, fetchRevisiones, fetchDetecciones]);
 
   const handleDeleteAll = useCallback(async () => {
     const confirmed = window.confirm(
@@ -408,7 +484,8 @@ const RevisionesEntregadas = () => {
       await api.post('/upload/delete-all');
       addToast({ type: 'success', message: 'Todos los registros fueron eliminados correctamente.' });
       setSelectedRows([]);
-      fetchExcelData(page, filterType);
+      fetchRevisiones(page, filterType);
+      fetchDetecciones(page, filterType);
     } catch (err) {
       const message =
         err?.response?.data?.message ??
@@ -423,7 +500,7 @@ const RevisionesEntregadas = () => {
     } finally {
       setDeletingAll(false);
     }
-  }, [fetchExcelData, page, filterType, addToast]);
+  }, [fetchRevisiones, fetchDetecciones, page, filterType, addToast]);
 
   const handleToggleSelectAll = useCallback(() => {
     if (formattedData.length === 0) {
@@ -463,28 +540,23 @@ const RevisionesEntregadas = () => {
     [selectedRows]
   );
 
-  const handleOpenFileDialog = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   const selectedCount = selectedRows.length;
   const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
   const allRowsSelected = formattedData.length > 0 && selectedRows.length === formattedData.length;
   const hasData = totalRecords > 0 || formattedData.length > 0;
 
   useEffect(() => {
-    fetchExcelData(page);
-  }, [fetchExcelData, page]);
+    // Cargar datos según el tipo de filtro
+    if (filterType === 'revision') {
+      fetchRevisiones();
+    } else if (filterType === 'deteccion') {
+      fetchDetecciones();
+    }
+  }, [fetchRevisiones, fetchDetecciones, page, filterType]);
 
   useEffect(() => {
     fetchFilterOptions(filterType);
   }, [fetchFilterOptions, filterType]);
-
-  useEffect(() => {
-    setFormattedData(formatUploadedData(excelData));
-  }, [excelData, formatUploadedData]);
 
   const handlePageChange = (newPage) => {
     const clampedPage = Math.max(1, Math.min(newPage, totalPages));
@@ -516,28 +588,24 @@ const RevisionesEntregadas = () => {
               </div>
 
               <div className="revisiones-header__controls">
-                <select
-                  className="form-select revisiones-upload-select"
-                  value={uploadType}
-                  onChange={(event) => setUploadType(event.target.value)}
-                  aria-label="Tipo de carga"
-                >
-                  <option value="detecciones">Detecciones</option>
-                  <option value="revisiones">Revisiones</option>
-                </select>
-
                 <div className="revisiones-actions">
                   <button
                     type="button"
                     className="btn btn-primary btn-sm me-2"
-                    onClick={handleOpenFileDialog}
+                    onClick={handleOpenFormModal}
                   >
-                    Subir archivo de Excel
+                    Crear nuevo folio
                   </button>
-                  <button
+                                    <button
                     type="button"
                     className="btn btn-outline-primary btn-sm me-2"
-                    onClick={() => fetchExcelData(1, filterType)}
+                    onClick={() => {
+                      if (filterType === 'revision') {
+                        fetchRevisiones();
+                      } else if (filterType === 'deteccion') {
+                        fetchDetecciones();
+                      }
+                    }}
                     disabled={loading}
                   >
                     {loading ? 'Actualizando…' : 'Actualizar datos'}
@@ -562,32 +630,11 @@ const RevisionesEntregadas = () => {
                       </button>
                     </>
                   )}
-                  {uploadStatus.message && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => setUploadStatus({ type: 'info', message: '' })}
-                    >
-                      Limpiar mensaje
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleUploadExcel}
-              accept=".xlsx,.xls,.csv"
-              style={{ display: 'none' }}
-            />
 
-            {uploadStatus.message && (
-              <div className={`alert alert-${uploadStatus.type} mt-3`} role="alert">
-                {uploadStatus.message}
-              </div>
-            )}
 
             {error && (
               <div className="alert alert-danger mt-3" role="alert">
@@ -604,13 +651,17 @@ const RevisionesEntregadas = () => {
                     const value = event.target.value;
                     setFilterType(value);
                     setPage(1);
-                    fetchExcelData(1, value);
+                    if (value === 'revision') {
+                      fetchRevisiones();
+                    } else if (value === 'deteccion') {
+                      fetchDetecciones();
+                    }
                     fetchFilterOptions(value);
                   }}
                 >
                   <option value="all">Todos</option>
-                  <option value="detecciones">Detecciones</option>
-                  <option value="revisiones">Revisiones</option>
+                  <option value="revision">Revisiones</option>
+                  <option value="deteccion">Detecciones</option>
                 </select>
                 <select
                   className="form-select filters-panel__control"
@@ -672,7 +723,7 @@ const RevisionesEntregadas = () => {
               ) : formattedData.length === 0 ? (
                 <div className="text-center py-5">
                   <h3 className="h5">No hay registros disponibles.</h3>
-                  <p className="text-muted mb-0">Carga un archivo Excel desde el panel correspondiente.</p>
+                  <p className="text-muted mb-0">Crea nuevos folios usando el formulario manual.</p>
                 </div>
               ) : (
                 <div className="data-table-wrapper revisiones-table-wrapper mt-3">
@@ -810,6 +861,12 @@ const RevisionesEntregadas = () => {
         </div>
       </main>
       <Footer />
+      <RevisionFormModal
+        isOpen={showFormModal}
+        onClose={handleCloseFormModal}
+        onSubmit={handleCreateFolio}
+        loading={formLoading}
+      />
     </div>
   );
 };

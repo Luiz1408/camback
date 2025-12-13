@@ -5,9 +5,11 @@ import { NavLink } from 'react-router-dom';
 const NAV_LINKS = [
   { key: 'dashboard', to: '/', label: 'Inicio', end: true },
   { key: 'revisiones-entregadas', to: '/revisiones-entregadas', label: 'Revisiones entregadas' },
+  { key: 'captura-revisiones', to: '/captura-revisiones', label: 'Captura revisiones' },
   { key: 'entrega-turno', to: '/entrega-turno', label: 'Entrega de turno' },
   { key: 'planeacion-tecnica', to: '/planeacion-tecnica', label: 'Planeación técnica' },
   { key: 'cronograma-soporte', to: '/cronograma-soporte', label: 'Cronograma soporte' },
+  { key: 'admin-catalogos', to: '/admin-catalogos', label: 'Admin Catálogos' },
   { key: 'charts', to: '/charts', label: 'Ver gráficas' },
 ];
 
@@ -21,6 +23,17 @@ const MainNavbar = ({
 }) => {
   const resolvedBrandLabel = (brandLabel || '').trim() || 'CAM TRUPER';
 
+  // Determinar qué enlaces mostrar según el rol
+  const getNavLinks = () => {
+    if (isAdmin) {
+      return NAV_LINKS;
+    }
+    // Para todos los demás roles, solo mostrar Inicio y Captura Revisiones
+    return NAV_LINKS.filter(link => 
+      link.key === 'dashboard' || link.key === 'captura-revisiones'
+    );
+  };
+
   return (
     <nav className="navbar navbar-expand-lg truper-navbar shadow-sm fixed-top">
       <div className="container-fluid px-0 d-flex align-items-center justify-content-between">
@@ -30,7 +43,7 @@ const MainNavbar = ({
             <span className="navbar-subtitle small">Plataforma Integral de Operaciones</span>
           </div>
           <ul className="navbar-nav flex-row flex-wrap gap-2">
-            {NAV_LINKS.map(({ key, to, label, end }) => (
+            {getNavLinks().map(({ key, to, label, end }) => (
               <li key={key} className="nav-item">
                 <NavLink
                   to={to}

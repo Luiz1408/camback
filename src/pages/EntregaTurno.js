@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import MainNavbar from '../components/Layout/MainNavbar';
 import Footer from '../components/Layout/Footer';
+import { formatUserName } from '../utils/formatUserName';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserManagement } from '../contexts/UserManagementContext';
 import api from '../services/api';
@@ -10,6 +11,7 @@ import ModernModal from '../components/Common/ModernModal';
 import '../components/Common/ModernModal.css';
 import './EntregaTurno.css';
 import './EntregaTurno-titles.css';
+import '../styles/responsive.css';
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -210,26 +212,7 @@ const EntregaTurno = () => {
   const hasPermissionToInteract = isAdmin;
   const hasPermissionToCreate = isAdmin || isCoordinator;
 
-  const displayName = useMemo(() => {
-    if (!currentUser) {
-      return '';
-    }
-
-    const firstName = (currentUser.firstName || '')
-      .split(' ')
-      .map((part) => part.trim())
-      .filter(Boolean)[0];
-    const lastName = (currentUser.lastName || '')
-      .split(' ')
-      .map((part) => part.trim())
-      .filter(Boolean)[0];
-
-    if (firstName || lastName) {
-      return [firstName, lastName].filter(Boolean).join(' ');
-    }
-
-    return currentUser.fullName || currentUser.username || '';
-  }, [currentUser]);
+  const displayName = formatUserName(currentUser);
 
   const loadData = useCallback(async () => {
     try {
