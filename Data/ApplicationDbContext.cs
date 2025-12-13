@@ -17,6 +17,8 @@ namespace ExcelProcessorApi.Data
         public DbSet<ShiftHandOffAcknowledgement> ShiftHandOffAcknowledgements { get; set; }
         public DbSet<TechnicalActivity> TechnicalActivities { get; set; }
         public DbSet<TechnicalActivityImage> TechnicalActivityImages { get; set; }
+        public DbSet<Catalogo> Catalogos { get; set; }
+        public DbSet<AlmacenUbicacionFolio> AlmacenUbicacionFolios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -338,12 +340,35 @@ namespace ExcelProcessorApi.Data
                         LastLogin = null
                     });
             });
+
+            modelBuilder.Entity<AlmacenUbicacionFolio>(entity =>
+            {
+                entity.Property(e => e.Almacen)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.FolioAsignado1)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Ubicacion)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.FechaCreacion)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.Property(e => e.CreadoPor)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.ActualizadoPor)
+                    .HasMaxLength(100);
+            });
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.ConfigureWarnings(warnings => 
-                warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            // Configuración de advertencias eliminada para compatibilidad con EF Core 8.0
         }
     }
 }

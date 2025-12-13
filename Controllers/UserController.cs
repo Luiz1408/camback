@@ -179,6 +179,34 @@ namespace ExcelProcessorApi.Controllers
             }
         }
 
+        [HttpGet("role/{roleName}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsersByRole(string roleName)
+        {
+            try
+            {
+                var users = await _context.Users
+                    .Include(u => u.Role)
+                    .Where(u => u.IsActive && u.Role != null && u.Role.Name == roleName)
+                    .OrderBy(u => u.FirstName)
+                    .ThenBy(u => u.LastName)
+                    .Select(u => new
+                    {
+                        u.Id,
+                        FullName = (u.FirstName + " " + u.LastName).Trim(),
+                        u.Username,
+                        Role = u.Role.Name
+                    })
+                    .ToListAsync();
+
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al obtener usuarios por rol: {ex.Message}" });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
         {
