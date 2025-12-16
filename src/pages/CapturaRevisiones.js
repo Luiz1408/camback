@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import MainNavbar from '../components/Layout/MainNavbar';
 import NuevaRevisionModal from '../components/NuevaRevisionModal';
 import { getUsersByRole, getRevisiones, createRevision, updateRevision, deleteRevision } from '../services/api';
+import { useUserManagement } from '../contexts/UserManagementContext';
 import { formatUserName } from '../utils/formatUserName';
 import './CapturaRevisiones.css';
 import '../styles/responsive.css';
@@ -44,6 +45,7 @@ const MESES_ORDEN = [
 ];
 
 const CapturaRevisiones = () => {
+  const { openModal: openUserManagementModal } = useUserManagement();
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [revisiones, setRevisiones] = useState([]);
@@ -93,7 +95,8 @@ const CapturaRevisiones = () => {
   };
 
   const handleManageUsers = () => {
-    console.log('Gestionando usuarios...');
+    // Abrir modal de gestión de usuarios
+    openUserManagementModal();
   };
 
   const displayName = formatUserName(user);
@@ -222,6 +225,14 @@ const CapturaRevisiones = () => {
   };
 
   const cargarDatos = async () => {
+    // Verificar si hay token antes de cargar datos
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('No hay token, redirigiendo al login...');
+      window.location.href = '/login';
+      return;
+    }
+
     try {
       const monitoristasData = await getUsersByRole('Monitorista');
       console.log('Monitoristas cargados:', monitoristasData);
@@ -234,6 +245,15 @@ const CapturaRevisiones = () => {
       setMonitoristaSeleccionadoIds(mapping);
     } catch (error) {
       console.error('Error cargando datos:', error);
+      // Si hay error de autenticación, redirigir al login
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('Error de autenticación, redirigiendo al login...');
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+      
       setRevisiones([
         {
           id: 1,
@@ -368,6 +388,26 @@ const CapturaRevisiones = () => {
         },
       }
     );
+  };
+
+  const handleFechaIncidenteChange = async (revisionId, nuevaFecha) => {
+    try {
+      await updateRevision(revisionId, { fechaIncidente: nuevaFecha });
+      setRevisiones((prev) =>
+        prev.map((revision) =>
+          revision.id === revisionId ? { ...revision, fechaIncidente: nuevaFecha } : revision
+        )
+      );
+      await cargarDatos();
+      showFeedback('Fecha actualizada', 'La fecha del incidente se actualizó correctamente.', 'success');
+    } catch (error) {
+      console.error('Error actualizando fecha del incidente:', error);
+      showFeedback(
+        'Error al actualizar',
+        'No se pudo actualizar la fecha del incidente. Verifica el backend e inténtalo de nuevo.',
+        'danger'
+      );
+    }
   };
 
   const handleFechaRegistroChange = async (revisionId, nuevaFecha) => {
@@ -1007,7 +1047,12 @@ const CapturaRevisiones = () => {
                               <div className="bg-warning bg-opacity-10 rounded-circle p-2 me-2">
                                 <i className="fas fa-exclamation-triangle text-warning"></i>
                               </div>
-                              <span className="fw-medium">{formatDate(revision.fechaIncidente)}</span>
+                              <input
+                                type="date"
+                                className="form-control form-control-sm border-0 bg-light"
+                                value={revision.fechaIncidente}
+                                onChange={(e) => handleFechaIncidenteChange(revision.id, e.target.value)}
+                              />
                             </div>
                           </td>
                           <td className="align-middle">

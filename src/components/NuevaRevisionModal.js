@@ -12,6 +12,13 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
     areaQueSolicita: ''
   });
 
+  const [errors, setErrors] = useState({
+    titulo: '',
+    fechaIncidente: '',
+    ubicacion: '',
+    areaQueSolicita: ''
+  });
+
   const [almacenes, setAlmacenes] = useState([]);
   const [areasSolicita, setAreasSolicita] = useState([]);
   const [loadingCatalogos, setLoadingCatalogos] = useState(false);
@@ -95,6 +102,38 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validar campos requeridos
+    const newErrors = {};
+    let hasErrors = false;
+    
+    if (!formData.titulo.trim()) {
+      newErrors.titulo = 'El título es requerido';
+      hasErrors = true;
+    }
+    
+    if (!formData.fechaIncidente) {
+      newErrors.fechaIncidente = 'La fecha del incidente es requerida';
+      hasErrors = true;
+    }
+    
+    if (!formData.ubicacion.trim()) {
+      newErrors.ubicacion = 'La ubicación es requerida';
+      hasErrors = true;
+    }
+    
+    if (!formData.areaQueSolicita.trim()) {
+      newErrors.areaQueSolicita = 'El área que solicita es requerida';
+      hasErrors = true;
+    }
+    
+    if (hasErrors) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    // Limpiar errores y enviar
+    setErrors({});
     if (onSubmit) {
       onSubmit(formData);
     }
@@ -107,6 +146,7 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
       ubicacion: '',
       areaQueSolicita: ''
     });
+    setErrors({});
     if (onClose) {
       onClose();
     }
@@ -117,6 +157,8 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
       show={isOpen}
       onClose={handleClose}
       title="Nueva Revisión"
+      onSubmit={handleSubmit}
+      submitText="Crear"
       loading={loading}
     >
       <form onSubmit={handleSubmit}>
@@ -124,25 +166,27 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
           <label className="form-label fw-semibold">Título *</label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.titulo ? 'is-invalid' : ''}`}
             name="titulo"
             value={formData.titulo}
             onChange={handleInputChange}
             placeholder="Ingrese el título de la revisión"
             required
           />
+          {errors.titulo && <div className="invalid-feedback">{errors.titulo}</div>}
         </div>
 
         <div className="mb-3">
           <label className="form-label fw-semibold">Fecha del Incidente *</label>
           <input
             type="date"
-            className="form-control"
+            className={`form-control ${errors.fechaIncidente ? 'is-invalid' : ''}`}
             name="fechaIncidente"
             value={formData.fechaIncidente}
             onChange={handleInputChange}
             required
           />
+          {errors.fechaIncidente && <div className="invalid-feedback">{errors.fechaIncidente}</div>}
         </div>
 
         <div className="mb-3">
@@ -155,6 +199,7 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
             disabled={loadingCatalogos}
             placeholder="Seleccionar almacén..."
           />
+          {errors.ubicacion && <div className="text-danger small mt-1">{errors.ubicacion}</div>}
         </div>
 
         <div className="mb-4">
@@ -167,31 +212,7 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
             disabled={loadingCatalogos}
             placeholder="Seleccionar área que solicita..."
           />
-        </div>
-
-        <div className="d-flex justify-content-end gap-2">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleClose}
-            disabled={loading}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" />
-                Guardando...
-              </>
-            ) : (
-              'Guardar Revisión'
-            )}
-          </button>
+          {errors.areaQueSolicita && <div className="text-danger small mt-1">{errors.areaQueSolicita}</div>}
         </div>
       </form>
     </ModernModal>

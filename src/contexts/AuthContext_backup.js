@@ -130,16 +130,26 @@ export function AuthProvider({ children }) {
         roleId,
       });
 
+      const responseUser = data?.user;
+
+      if (!responseUser?.token) {
+        return {
+          success: false,
+          error: 'Respuesta inválida del servidor al registrar usuario',
+        };
+      }
+
       const userInfo = {
-        username: data.username,
-        fullName: data.fullName,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: data.role,
-        expiresAt: data.expiresAt,
+        username: responseUser.username,
+        fullName: responseUser.fullName,
+        firstName: responseUser.firstName,
+        lastName: responseUser.lastName,
+        role: responseUser.role,
+        expiresAt: responseUser.expiresAt,
       };
 
-      persistSession(data.token, userInfo);
+      persistSession(responseUser.token, userInfo);
+
       return { success: true };
     } catch (error) {
       return {
@@ -149,17 +159,42 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearSession();
+  }, [clearSession]);
+
+  const changePassword = async (userId, newPassword) => {
+    if (!userId || !newPassword) {
+      return { success: false, error: 'Datos inválidos' };
+    }
+
+    try {
+      await api.put(`/user/${userId}/password`, { newPassword });
+      return { success: true };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        (typeof error?.response?.data === 'string' ? error.response.data : '') ||
+        error?.message ||
+        'No se pudo actualizar la contraseña.';
+      return {
+        success: false,
+        error: message,
+      };
+    }
   };
 
   const value = {
     currentUser,
-    loading,
     login,
-    register,
     logout,
+    register,
+    changePassword,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 }

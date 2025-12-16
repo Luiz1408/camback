@@ -12,6 +12,14 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isForgotOpen, setIsForgotOpen] = useState(false);
+  const [registerData, setRegisterData] = useState({
+    username: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    roleId: '2',
+  });
+  const [registerError, setRegisterError] = useState('');
 
   // Agregar clase login-page al body
   useEffect(() => {
@@ -22,12 +30,15 @@ const Login = () => {
       document.body.classList.remove('login-page');
     };
   }, []);
-
-  const { login, currentUser } = useAuth();
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const { login, register, currentUser } = useAuth();
   const navigate = useNavigate();
 
-  // Remover el useEffect que causa el bucle infinito
-  // La redirección se manejará en el handleSubmit
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/', { replace: true });
+    }
+  }, [currentUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +48,6 @@ const Login = () => {
     const result = await login(username, password);
 
     if (result.success) {
-      // Redirección usando navigate de React Router
       navigate('/');
     } else {
       setError(result.error || 'Error al iniciar sesión');
@@ -46,7 +56,53 @@ const Login = () => {
     setLoading(false);
   };
 
+  const handleRegisterChange = (field) => (event) => {
+    setRegisterData((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const resetRegisterForm = () => {
+    setRegisterData({
+      username: '',
+      password: '',
+      firstName: '',
+      lastName: '',
+      roleId: '2',
+    });
+    setRegisterError('');
+  };
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+    setRegisterError('');
+
+    if (!registerData.username || !registerData.password || !registerData.firstName || !registerData.lastName) {
+      setRegisterError('Completa todos los campos requeridos');
+      return;
+    }
+
+    setRegisterLoading(true);
+
+    const result = await register({
+      username: registerData.username,
+      password: registerData.password,
+      firstName: registerData.firstName,
+      lastName: registerData.lastName,
+      roleId: Number(registerData.roleId) || 2,
+    });
+
+    if (result.success) {
+      resetRegisterForm();
+      setIsRegisterOpen(false);
+      navigate('/');
+    } else {
+      setRegisterError(result.error || 'Error al registrarse');
+    }
+
+    setRegisterLoading(false);
+  };
+
   const handleOpenRegister = () => {
+    resetRegisterForm();
     setIsRegisterOpen(true);
   };
 

@@ -18,6 +18,8 @@ const CORPORATE_INFO = {
   ]
 };
 
+
+
 const TESCUCHA_INFO = {
   title: "TEscucha TRUPER",
   description: "Sistema de denuncias éticas para mantener la integridad y transparencia en nuestra organización",
@@ -29,10 +31,7 @@ const TESCUCHA_INFO = {
   url: "https://www.tescucha.com/tescucha/home/colaborador"
 };
 
-const HERO_ACTIONS = [
-  { label: 'Revisiones entregadas', variant: 'primary', path: '/revisiones-entregadas' },
-  { label: 'Ver gráficas', variant: 'outline', path: '/charts' },
-];
+const HERO_ACTIONS = [];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -41,7 +40,6 @@ const Dashboard = () => {
   
   const [metricsLoading, setMetricsLoading] = useState(true);
   const [dashboardMetrics, setDashboardMetrics] = useState({
-    revisionesProcesadas: 0,
     monitoristasActivos: 0,
     tiempoPromedio: '0 min',
   });
@@ -113,13 +111,6 @@ const Dashboard = () => {
             </div>
             <div className="col-lg-4">
               <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-card__icon">📊</div>
-                  <div className="stat-card__value">
-                    {metricsLoading ? '...' : dashboardMetrics.revisionesProcesadas}
-                  </div>
-                  <div className="stat-card__label">Revisiones procesadas</div>
-                </div>
                 <div className="stat-card">
                   <div className="stat-card__icon">👥</div>
                   <div className="stat-card__value">

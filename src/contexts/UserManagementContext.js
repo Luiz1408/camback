@@ -852,9 +852,6 @@ export const UserManagementProvider = ({ children }) => {
         <div className="card user-modal shadow-lg border-0" onClick={(event) => event.stopPropagation()}>
           <div className="card-header d-flex align-items-center justify-content-between">
             <div>
-              <h2 className="h5 mb-1" id="user-modal-title">
-                Gestión de usuarios
-              </h2>
               <p className="user-modal-subtitle mb-0">Cambia roles o elimina cuentas de manera segura.</p>
             </div>
             <div className="d-flex gap-2">

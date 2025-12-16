@@ -1414,31 +1414,6 @@ const RevisionFormModal = ({ isOpen, onClose, onSubmit, loading }) => {
               {/* Campos específicos según el tipo */}
               {formData.tipo === 'revision' ? renderCamposRevision() : renderCamposDeteccion()}
             </div>
-            
-            <div className="card-footer border-0 bg-transparent">
-              <button 
-                type="button" 
-                className="btn btn-secondary" 
-                onClick={onClose} 
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Guardando...
-                  </>
-                ) : (
-                  'Guardar Folio'
-                )}
-              </button>
-            </div>
           </form>
         </div>
       </div>
