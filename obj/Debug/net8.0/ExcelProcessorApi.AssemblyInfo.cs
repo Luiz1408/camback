@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ExcelProcessorApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f0bdca7d793b2ccf9954eeaaa172429fc1734ecc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6b6fb1178630c215336d899f1d8e7320ce875a1d")]
 [assembly: System.Reflection.AssemblyProductAttribute("ExcelProcessorApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ExcelProcessorApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
