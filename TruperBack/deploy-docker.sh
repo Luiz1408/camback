@@ -61,7 +61,7 @@ docker run -d \
     -p $PORT:80 \
     -e ASPNETCORE_ENVIRONMENT=$ASPNETCORE_ENVIRONMENT \
     -e ASPNETCORE_URLS=$ASPNETCORE_URLS \
-    -e ConnectionStrings__DefaultConnection="Server=10.208.212.37;Database=ExcelProcessorDB;User Id=sa;Password=adm1n.123;TrustServerCertificate=True;" \
+    -e ConnectionStrings__DefaultConnection="Server=10.110.224.35;Database=ExcelProcessorDB;User Id=sa;Password=adm1n.123;TrustServerCertificate=True;" \
     -e JwtSettings__Secret="ExcelProcessorApiSecretKey2024!@#$%^&*()_+" \
     -e JwtSettings__Issuer="ExcelProcessorApi" \
     -e JwtSettings__Audience="ExcelProcessorApiUsers" \
