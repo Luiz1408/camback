@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAMFront\\TruperBack\\TruperBack.csproj": {}
+    "C:\\Users\\ferna\\onedrive\\documents\\truper_camfront\\truperback\\TruperBack.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAMFront\\TruperBack\\TruperBack.csproj": {
+    "C:\\Users\\ferna\\onedrive\\documents\\truper_camfront\\truperback\\TruperBack.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAMFront\\TruperBack\\TruperBack.csproj",
+        "projectUniqueName": "C:\\Users\\ferna\\onedrive\\documents\\truper_camfront\\truperback\\TruperBack.csproj",
         "projectName": "TruperBack",
-        "projectPath": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAMFront\\TruperBack\\TruperBack.csproj",
+        "projectPath": "C:\\Users\\ferna\\onedrive\\documents\\truper_camfront\\truperback\\TruperBack.csproj",
         "packagesPath": "C:\\Users\\ferna\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAMFront\\TruperBack\\obj\\",
+        "outputPath": "C:\\Users\\ferna\\onedrive\\documents\\truper_camfront\\truperback\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

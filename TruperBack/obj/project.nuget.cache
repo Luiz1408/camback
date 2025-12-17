@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "96Me4NnGcC0=",
+  "dgSpecHash": "N+s/IUwEfdM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAMFront\\TruperBack\\TruperBack.csproj",
+  "projectFilePath": "C:\\Users\\ferna\\onedrive\\documents\\truper_camfront\\truperback\\TruperBack.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ferna\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\ferna\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
