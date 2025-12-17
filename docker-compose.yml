@@ -1,30 +1,22 @@
 version: '3.8'
 
 services:
-  # Backend API
-  api:
+  # Frontend React
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: truper-api
+    container_name: truper-frontend
     ports:
-      - "8080:80"
+      - "3000:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=10.110.224.37;Database=ExcelProcessorDB;User Id=sa;Password=ADM1N.123;TrustServerCertificate=True;
-      - JwtSettings__Secret=ExcelProcessorApiSecretKey2024!@#$%^&*()_+
-      - JwtSettings__Issuer=ExcelProcessorApi
-      - JwtSettings__Audience=ExcelProcessorApiUsers
-      - JwtSettings__ExpiryInHours=24
-    volumes:
-      - ./logs:/app/logs
-      - ./wwwroot/uploads:/app/wwwroot/uploads
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://10.110.224.37:8080/api
     restart: unless-stopped
     networks:
       - truper-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/swagger/index.html"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35,7 +27,5 @@ networks:
     driver: bridge
 
 volumes:
-  truper-logs:
-    driver: local
-  truper-uploads:
+  truper-frontend-build:
     driver: local
