@@ -1,37 +1,4 @@
-<<<<<<< HEAD
-# Multi-stage build for React frontend
-FROM node:18-alpine AS build
 
-# Set working directory
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies including dev dependencies for build
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Build the React app
-RUN npm run build
-
-# Production stage
-FROM nginx:alpine AS production
-
-# Copy built React app to nginx
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 80
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
-=======
 # Multi-stage build for ASP.NET Core 8.0
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
@@ -65,4 +32,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:80
 
 ENTRYPOINT ["dotnet", "TruperBack.dll"]
->>>>>>> df5edb3644c9f025f8c25dd2ba78c18b12860b94
+
