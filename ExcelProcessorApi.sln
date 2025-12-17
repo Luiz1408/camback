@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelProcessorApi", "ExcelProcessorApi.csproj", "{47D679EC-7045-FA8A-A752-6AEFB8243E5D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47D679EC-7045-FA8A-A752-6AEFB8243E5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47D679EC-7045-FA8A-A752-6AEFB8243E5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47D679EC-7045-FA8A-A752-6AEFB8243E5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47D679EC-7045-FA8A-A752-6AEFB8243E5D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A53065C-8E90-45FE-8B1E-66CEFBAF8D2A}
+	EndGlobalSection
+EndGlobal

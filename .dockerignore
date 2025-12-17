@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies
 node_modules
 npm-debug.log*
@@ -36,6 +37,28 @@ Thumbs.db
 
 # Git
 .git
+=======
+# .NET build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.json
+*.json.map
+
+# Visual Studio files
+.vs/
+.vscode/
+*.user
+*.suo
+*.cache
+*.userosscache
+*.sln.docstates
+
+# Git files
+.git/
+>>>>>>> df5edb3644c9f025f8c25dd2ba78c18b12860b94
 .gitignore
 .gitattributes
 
@@ -44,16 +67,51 @@ Dockerfile
 docker-compose*.yml
 .dockerignore
 
+<<<<<<< HEAD
 # Logs
 logs
 *.log
 
 # Runtime data
 pids
+=======
+# Environment files
+.env
+.env.*
+!.env.production
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+>>>>>>> df5edb3644c9f025f8c25dd2ba78c18b12860b94
 *.pid
 *.seed
 *.pid.lock
 
+<<<<<<< HEAD
 # Temporary folders
 tmp
 temp
@@ -64,12 +122,24 @@ temp
 
 # ESLint
 .eslintcache
+=======
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+>>>>>>> df5edb3644c9f025f8c25dd2ba78c18b12860b94
 
 # Optional npm cache directory
 .npm
 
+<<<<<<< HEAD
 # Optional REPL history
 .node_repl_history
+=======
+# Optional eslint cache
+.eslintcache
+>>>>>>> df5edb3644c9f025f8c25dd2ba78c18b12860b94
 
 # Output of 'npm pack'
 *.tgz
@@ -77,9 +147,38 @@ temp
 # Yarn Integrity file
 .yarn-integrity
 
+<<<<<<< HEAD
 # Storybook build outputs
 .out
 .storybook-out
 
 # Runtime
 *.tsbuildinfo
+=======
+# dotenv environment variables file
+.env
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+>>>>>>> df5edb3644c9f025f8c25dd2ba78c18b12860b94

@@ -52,7 +52,7 @@ namespace TruperBack
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+                    policy.WithOrigins("http://10.110.224.37:3000", "http://localhost:3000")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Backend API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: truper-api
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=10.110.224.37;Database=ExcelProcessorDB;User Id=sa;Password=ADM1N.123;TrustServerCertificate=True;
+      - JwtSettings__Secret=ExcelProcessorApiSecretKey2024!@#$%^&*()_+
+      - JwtSettings__Issuer=ExcelProcessorApi
+      - JwtSettings__Audience=ExcelProcessorApiUsers
+      - JwtSettings__ExpiryInHours=24
+    volumes:
+      - ./logs:/app/logs
+      - ./wwwroot/uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+    networks:
+      - truper-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/swagger/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  truper-network:
+    driver: bridge
+
+volumes:
+  truper-logs:
+    driver: local
+  truper-uploads:
+    driver: local
