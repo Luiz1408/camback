@@ -12,7 +12,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=10.208.212.37;Database=ExcelProcessorDB;User Id=sa;Password=adm1n.123;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=10.110.224.37;Database=ExcelProcessorDB;User Id=sa;Password=ADM1N.123;TrustServerCertificate=True;
       - JwtSettings__Secret=ExcelProcessorApiSecretKey2024!@#$%^&*()_+
       - JwtSettings__Issuer=ExcelProcessorApi
       - JwtSettings__Audience=ExcelProcessorApiUsers

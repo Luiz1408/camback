@@ -1,0 +1,69 @@
+/* Footer Component - Black Theme */
+
+.truper-footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #000000 50%, #2d2d2d 100%);
+  color: white;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.truper-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.3), 
+    transparent
+  );
+}
+
+.footer-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.footer-text:hover {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .truper-footer {
+    padding: 0.4rem 0;
+  }
+  
+  .footer-text {
+    font-size: 0.7rem;
+  }
+}
+
+/* Integration with dashboard layout */
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.dashboard-wrapper main {
+  flex: 1;
+}
+
+/* Login page footer integration */
+.login-background {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-background .truper-footer {
+  margin-top: auto;
+}

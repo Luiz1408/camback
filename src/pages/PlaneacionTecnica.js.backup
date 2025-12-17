@@ -1,0 +1,726 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { useNavigate } from 'react-router-dom';
+import MainNavbar from '../components/Layout/MainNavbar';
+import Footer from '../components/Layout/Footer';
+import { useAuth } from '../contexts/AuthContext';
+import { useUserManagement } from '../contexts/UserManagementContext';
+import { formatDateTime } from '../utils/date';
+import {
+  fetchTechnicalActivities,
+  createTechnicalActivity,
+  updateTechnicalActivity,
+  fetchTechnicalActivitiesSummary,
+  deleteTechnicalActivity,
+} from '../services/technicalActivities';
+import api from '../services/api';
+import ModernModal from '../components/Common/ModernModal';
+import '../components/Common/ModernModal.css';
+import 'react-datepicker/dist/react-datepicker.css';
+import './PlaneacionTecnica.css';
+import './PlaneacionTecnica-images.css';
+import './PlaneacionTecnica-modal.css';
+
+const STATUS_OPTIONS = [
+  { value: 'Pendiente', label: 'Pendiente' },
+  { value: 'No realizada', label: 'No realizada' },
+  { value: 'Finalizada', label: 'Finalizada' },
+];
+
+const PlaneacionTecnica = () => {
+  const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
+  const { openModal: openUserManagementModal } = useUserManagement();
+
+  const [activities, setActivities] = useState([]);
+  const [description, setDescription] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [notes, setNotes] = useState('');
+  const [pageError, setPageError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creatingActivity, setCreatingActivity] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState({ total: 0, completed: 0, pending: 0 });
+
+  // Estados para imágenes
+  const [antesImage, setAntesImage] = useState(null);
+  const [despuesImage, setDespuesImage] = useState(null);
+  const [antesPreview, setAntesPreview] = useState(null);
+  const [despuesPreview, setDespuesPreview] = useState(null);
+  const [imageError, setImageError] = useState('');
+
+  // Estados para modal de imagen
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
+  const [modalImageType, setModalImageType] = useState('');
+  const [modalImageFileName, setModalImageFileName] = useState('');
+
+  const isAdmin = currentUser?.role === 'admin';
+  const displayName = useMemo(() => {
+    if (!currentUser) return '';
+    const firstName = (currentUser.firstName || '').split(' ').map(part => part.trim()).filter(Boolean)[0];
+    const lastName = (currentUser.lastName || '').split(' ').map(part => part.trim()).filter(Boolean)[0];
+    if (firstName || lastName) return [firstName, lastName].filter(Boolean).join(' ');
+    return currentUser.fullName || currentUser.username || '';
+  }, [currentUser]);
+
+  const loadActivities = async () => {
+    try {
+      setLoading(true);
+      setPageError('');
+      const activitiesData = await fetchTechnicalActivities();
+      setActivities(activitiesData || []);
+      
+      const summaryData = await fetchTechnicalActivitiesSummary();
+      setSummary(summaryData || { total: 0, completed: 0, pending: 0 });
+    } catch (error) {
+      console.error('Error loading activities:', error);
+      setPageError('No se pudieron cargar las actividades técnicas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadActivities();
+  }, []);
+
+  // Funciones para manejar imágenes
+  const handleAntesImageChange = (e) => {
+    const file = e.target.files[0];
+    console.log('📷 Archivo ANTES seleccionado:', file);
+    
+    if (file) {
+      // Validar tipo de archivo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setImageError('Solo se permiten imágenes (JPG, PNG, GIF)');
+        return;
+      }
+      
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError('La imagen no debe ser mayor a 5MB');
+        return;
+      }
+      
+      setAntesImage(file);
+      const previewUrl = URL.createObjectURL(file);
+      console.log('🔗 Preview URL ANTES:', previewUrl);
+      setAntesPreview(previewUrl);
+      setImageError('');
+    }
+  };
+
+  const handleDespuesImageChange = (e) => {
+    const file = e.target.files[0];
+    console.log('📷 Archivo DESPUÉS seleccionado:', file);
+    
+    if (file) {
+      // Validar tipo de archivo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setImageError('Solo se permiten imágenes (JPG, PNG, GIF)');
+        return;
+      }
+      
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError('La imagen no debe ser mayor a 5MB');
+        return;
+      }
+      
+      setDespuesImage(file);
+      const previewUrl = URL.createObjectURL(file);
+      console.log('🔗 Preview URL DESPUÉS:', previewUrl);
+      setDespuesPreview(previewUrl);
+      setImageError('');
+    }
+  };
+
+  const clearAntesImage = () => {
+    setAntesImage(null);
+    setAntesPreview(null);
+  };
+
+  const clearDespuesImage = () => {
+    setDespuesImage(null);
+    setDespuesPreview(null);
+  };
+
+  // Funciones para modal de imagen
+  const openImageModal = (imageUrl, imageType, fileName) => {
+    const fullImageUrl = imageUrl.startsWith('http') 
+      ? imageUrl 
+      : `http://localhost:5236${imageUrl}`;
+    
+    setModalImage(fullImageUrl);
+    setModalImageType(imageType);
+    setModalImageFileName(fileName);
+    setShowImageModal(true);
+  };
+
+  const closeImageModal = () => {
+    setShowImageModal(false);
+    setModalImage(null);
+    setModalImageType('');
+    setModalImageFileName('');
+  };
+
+  const resetForm = () => {
+    setDescription('');
+    setStartDate(null);
+    setEndDate(null);
+    setNotes('');
+    clearAntesImage();
+    clearDespuesImage();
+    setImageError('');
+  };
+
+  const handleCreateActivity = async () => {
+    if (!description.trim()) {
+      setFormError('La descripción es requerida');
+      return;
+    }
+
+    try {
+      setCreatingActivity(true);
+      setFormError('');
+
+      // Crear FormData para enviar con imágenes
+      const formData = new FormData();
+      formData.append('description', description.trim());
+      formData.append('notes', notes.trim());
+      formData.append('status', 'Pendiente');
+      
+      if (startDate) {
+        formData.append('startDate', startDate.toISOString());
+      }
+      
+      if (endDate) {
+        formData.append('endDate', endDate.toISOString());
+      }
+      
+      // Agregar imágenes si existen
+      if (antesImage) {
+        formData.append('antesImage', antesImage);
+      }
+      
+      if (despuesImage) {
+        formData.append('despuesImage', despuesImage);
+      }
+
+      // Enviar FormData en lugar de JSON
+      const response = await api.post('/TechnicalActivities', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      console.log('Respuesta:', response.data);
+      
+      // Reset form
+      resetForm();
+      setShowCreateModal(false);
+      
+      // Reload activities
+      await loadActivities();
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'No se pudo crear la actividad';
+      setFormError(`Error: ${errorMessage}`);
+    } finally {
+      setCreatingActivity(false);
+    }
+  };
+
+  const handleUpdateActivityStatus = async (activityId, newStatus) => {
+    try {
+      await updateTechnicalActivity(activityId, { status: newStatus });
+      await loadActivities();
+    } catch (error) {
+      console.error('Error updating activity:', error);
+      setPageError('No se pudo actualizar el estatus de la actividad');
+    }
+  };
+
+  const handleDeleteActivity = async (activityId) => {
+    // Usar window.confirm para evitar el error de ESLint
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta actividad?')) {
+      return;
+    }
+
+    try {
+      await deleteTechnicalActivity(activityId);
+      await loadActivities();
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      setPageError('No se pudo eliminar la actividad');
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleManageUsers = () => {
+    openUserManagementModal();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Finalizada':
+        return 'planeacion-badge--success';
+      case 'No realizada':
+        return 'planeacion-badge--danger';
+      case 'Pendiente':
+      default:
+        return 'planeacion-badge--warning';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'Alta':
+        return 'alta';
+      case 'Media':
+        return 'media';
+      case 'Baja':
+      default:
+        return 'baja';
+    }
+  };
+
+  return (
+    <div className="planeacion-container">
+      <MainNavbar
+        displayName={displayName || currentUser?.username || ''}
+        role={currentUser?.role}
+        isAdmin={isAdmin}
+        onManageUsers={isAdmin ? handleManageUsers : undefined}
+        onLogout={handleLogout}
+      />
+
+      <main>
+        {/* Header */}
+        <div className="planeacion-header">
+          <div>
+            <h1 className="planeacion-title">Planeación técnica</h1>
+            <p className="planeacion-subtitle">
+              Registra actividades técnicas, define su estatus y dale seguimiento en un solo lugar.
+            </p>
+          </div>
+          <div className="d-flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-planeacion btn-planeacion--outline"
+              onClick={loadActivities}
+              disabled={loading}
+            >
+              {loading ? 'Actualizando…' : 'Refrescar'}
+            </button>
+            <button
+              type="button"
+              className="btn-planeacion btn-planeacion--primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              Nueva actividad
+            </button>
+          </div>
+        </div>
+
+        {/* Estadísticas */}
+        <div className="planeacion-stats-grid">
+          <div className="planeacion-stat-card">
+            <div className="planeacion-stat-value">{summary.total}</div>
+            <div className="planeacion-stat-label">Total de actividades</div>
+          </div>
+          <div className="planeacion-stat-card">
+            <div className="planeacion-stat-value">{summary.completed}</div>
+            <div className="planeacion-stat-label">Completadas</div>
+          </div>
+          <div className="planeacion-stat-card">
+            <div className="planeacion-stat-value">{summary.pending}</div>
+            <div className="planeacion-stat-label">Pendientes</div>
+          </div>
+        </div>
+
+        {/* Contenido principal */}
+        <div className="planeacion-card">
+          {pageError && (
+            <div className="alert alert-danger" role="alert">
+              {pageError}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="planeacion-loading">
+              <div className="planeacion-spinner"></div>
+              Cargando actividades…
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="planeacion-empty">
+              <div className="planeacion-empty-icon">🔧</div>
+              <h3 className="planeacion-empty-title">No hay actividades registradas</h3>
+              <p className="planeacion-empty-description">
+                Crea una nueva actividad para comenzar a dar seguimiento a las tareas técnicas.
+              </p>
+            </div>
+          ) : (
+            <div className="planeacion-activities-grid">
+              {activities.map((activity) => (
+                <div key={activity.id} className={`planeacion-activity-card ${activity.status?.toLowerCase().replace(' ', '-')}`}>
+                  <div className="planeacion-activity-header">
+                    <h3 className="planeacion-activity-title">{activity.description}</h3>
+                    <span className={`planeacion-activity-priority ${getPriorityColor(activity.priority)}`}>
+                      {activity.priority || 'Media'}
+                    </span>
+                  </div>
+
+                  <div className="planeacion-activity-description">
+                    {activity.notes && (
+                      <p>{activity.notes}</p>
+                    )}
+                  </div>
+
+                  {/* Mostrar imágenes si existen */}
+                  {activity.images && activity.images.length > 0 && (
+                    <div className="planeacion-activity-images">
+                      <div className="planeacion-activity-images-title">📷 Imágenes:</div>
+                      <div className="planeacion-activity-images-grid">
+                        {activity.images.map((image) => {
+                          // Construir URL completa del backend
+                          const imageUrl = image.url.startsWith('http') 
+                            ? image.url 
+                            : `http://localhost:5236${image.url}`;
+                          
+                          return (
+                            <div key={image.id} className="planeacion-activity-image-item">
+                              <img 
+                                src={imageUrl} 
+                                alt={`${image.type === 'antes' ? 'Antes' : 'Después'} - ${image.originalFileName}`}
+                                className="planeacion-activity-image"
+                                style={{
+                                  display: 'block !important',
+                                  width: '100% !important',
+                                  height: '100px !important',
+                                  objectFit: 'cover !important',
+                                  visibility: 'visible !important',
+                                  opacity: '1 !important'
+                                }}
+                                onLoad={() => console.log(`✅ Imagen guardada cargada: ${image.type}`, imageUrl)}
+                                onError={() => console.log(`❌ Error al cargar imagen guardada: ${image.type}`, imageUrl)}
+                                onClick={() => openImageModal(imageUrl, image.type, image.originalFileName)}
+                              />
+                              <div className="planeacion-activity-image-label">
+                                {image.type === 'antes' ? '📷 ANTES' : '📷 DESPUÉS'}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="planeacion-activity-meta">
+                    {activity.startDate && (
+                      <div className="planeacion-activity-meta-item">
+                        📅 Inicio: {formatDateTime(activity.startDate)}
+                      </div>
+                    )}
+                    {activity.endDate && (
+                      <div className="planeacion-activity-meta-item">
+                        🏁 Fin: {formatDateTime(activity.endDate)}
+                      </div>
+                    )}
+                    <div className="planeacion-activity-meta-item">
+                      👤 Creado por: {activity.createdBy?.name || activity.createdBy?.username || '—'}
+                    </div>
+                  </div>
+
+                  <div className="planeacion-activity-actions">
+                    <select
+                      className="planeacion-form-select"
+                      value={activity.status || 'Pendiente'}
+                      onChange={(e) => handleUpdateActivityStatus(activity.id, e.target.value)}
+                    >
+                      {STATUS_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        className="btn-planeacion btn-planeacion--danger btn-sm"
+                        onClick={() => handleDeleteActivity(activity.id)}
+                      >
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Modal para crear actividad */}
+        <ModernModal
+          show={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          title="Nueva actividad técnica"
+          onSubmit={handleCreateActivity}
+          submitText="Crear actividad"
+          submitDisabled={!description.trim()}
+          loading={creatingActivity}
+        >
+          {formError && (
+            <div className="alert alert-danger" role="alert">
+              {formError}
+            </div>
+          )}
+
+          {imageError && (
+            <div className="alert alert-warning" role="alert">
+              {imageError}
+            </div>
+          )}
+
+          <div className="modern-form-group">
+            <label className="modern-form-label">Descripción *</label>
+            <textarea
+              className="modern-form-textarea"
+              rows={3}
+              placeholder="Describe la actividad técnica a realizar..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={creatingActivity}
+            />
+          </div>
+
+          {/* Sección de imágenes */}
+          <div className="modern-form-section">
+            <h4 className="modern-form-section-title">📷 Imágenes de la actividad</h4>
+            
+            <div className="modern-form-grid modern-form-grid--2">
+              {/* Imagen ANTES */}
+              <div className="modern-form-group">
+                <label className="modern-form-label">Imagen ANTES (opcional)</label>
+                <div className="image-upload-container">
+                  <input
+                    type="file"
+                    id="antesImage"
+                    accept="image/*"
+                    onChange={handleAntesImageChange}
+                    disabled={creatingActivity}
+                    className="image-upload-input"
+                  />
+                  <label htmlFor="antesImage" className={`image-upload-label ${antesPreview ? 'has-image' : ''}`}>
+                    {antesPreview ? (
+                      <div className="image-preview" style={{display: 'block !important', width: '100%', height: '150px'}}>
+                        <img 
+                          src={antesPreview} 
+                          alt="Vista previa ANTES" 
+                          className="image-preview-img"
+                          style={{
+                            display: 'block !important',
+                            width: '100% !important',
+                            height: '100% !important',
+                            objectFit: 'cover !important',
+                            visibility: 'visible !important',
+                            opacity: '1 !important'
+                          }}
+                          onLoad={() => console.log('✅ Imagen ANTES cargada correctamente')}
+                          onError={() => console.log('❌ Error al cargar imagen ANTES')}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearAntesImage();
+                          }}
+                          className="image-clear-btn"
+                          disabled={creatingActivity}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="image-upload-placeholder">
+                        <div className="image-upload-icon">📷</div>
+                        <div className="image-upload-text">
+                          <div className="image-upload-title">Imagen ANTES</div>
+                          <div className="image-upload-subtitle">Estado inicial o referencia</div>
+                        </div>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              {/* Imagen DESPUÉS */}
+              <div className="modern-form-group">
+                <label className="modern-form-label">Imagen DESPUÉS (opcional)</label>
+                <div className="image-upload-container">
+                  <input
+                    type="file"
+                    id="despuesImage"
+                    accept="image/*"
+                    onChange={handleDespuesImageChange}
+                    disabled={creatingActivity}
+                    className="image-upload-input"
+                  />
+                  <label htmlFor="despuesImage" className={`image-upload-label ${despuesPreview ? 'has-image' : ''}`}>
+                    {despuesPreview ? (
+                      <div className="image-preview" style={{display: 'block !important', width: '100%', height: '150px'}}>
+                        <img 
+                          src={despuesPreview} 
+                          alt="Vista previa DESPUÉS" 
+                          className="image-preview-img"
+                          style={{
+                            display: 'block !important',
+                            width: '100% !important',
+                            height: '100% !important',
+                            objectFit: 'cover !important',
+                            visibility: 'visible !important',
+                            opacity: '1 !important'
+                          }}
+                          onLoad={() => console.log('✅ Imagen DESPUÉS cargada correctamente')}
+                          onError={() => console.log('❌ Error al cargar imagen DESPUÉS')}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearDespuesImage();
+                          }}
+                          className="image-clear-btn"
+                          disabled={creatingActivity}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="image-upload-placeholder">
+                        <div className="image-upload-icon">📷</div>
+                        <div className="image-upload-text">
+                          <div className="image-upload-title">Imagen DESPUÉS</div>
+                          <div className="image-upload-subtitle">Resultado final</div>
+                        </div>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="modern-form-grid modern-form-grid--2">
+            <div className="modern-form-group">
+              <label className="modern-form-label">Fecha de inicio</label>
+              <DatePicker
+                selected={startDate}
+                onChange={setStartDate}
+                selectsStart
+                startDate={startDate}
+                endDate={endDate}
+                dateFormat="dd/MM/yyyy"
+                className="modern-form-input"
+                placeholderText="Selecciona fecha de inicio"
+                disabled={creatingActivity}
+              />
+            </div>
+
+            <div className="modern-form-group">
+              <label className="modern-form-label">Fecha de fin</label>
+              <DatePicker
+                selected={endDate}
+                onChange={setEndDate}
+                selectsEnd
+                startDate={startDate}
+                endDate={endDate}
+                minDate={startDate}
+                dateFormat="dd/MM/yyyy"
+                className="modern-form-input"
+                placeholderText="Selecciona fecha de fin"
+                disabled={creatingActivity}
+              />
+            </div>
+          </div>
+
+          <div className="modern-form-group">
+            <label className="modern-form-label">Notas adicionales</label>
+            <textarea
+              className="modern-form-textarea"
+              rows={2}
+              placeholder="Notas o comentarios adicionales..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              disabled={creatingActivity}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </ModernModal>
+
+  {/* Modal para ver imagen */}
+  {showImageModal && (
+    <div className="image-modal-overlay" onClick={closeImageModal}>
+      <div className="image-modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="image-modal-header">
+          <h3 className="image-modal-title">
+            📷 {modalImageType === 'antes' ? 'Imagen ANTES' : 'Imagen DESPUÉS'}
+          </h3>
+          <button 
+            className="image-modal-close"
+            onClick={closeImageModal}
+          >
+            ✕
+          </button>
+        </div>
+        <div className="image-modal-content">
+          <img 
+            src={modalImage} 
+            alt={`${modalImageType === 'antes' ? 'Antes' : 'Después'} - ${modalImageFileName}`}
+            className="image-modal-img"
+            onError={() => console.log('❌ Error al cargar imagen en modal')}
+          />
+        </div>
+        <div className="image-modal-footer">
+          <div className="image-modal-info">
+            <span className="image-modal-filename">{modalImageFileName}</span>
+            <span className="image-modal-type">{modalImageType.toUpperCase()}</span>
+          </div>
+          <button 
+            className="image-modal-download"
+            onClick={() => {
+              const link = document.createElement('a');
+              link.href = modalImage;
+              link.download = modalImageFileName;
+              link.target = '_blank';
+              link.click();
+            }}
+          >
+            📥 Descargar
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <Footer />
+</main>
+</div>
+  );
+};
+
+export default PlaneacionTecnica;

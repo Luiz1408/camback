@@ -1,0 +1,262 @@
+/* Estilos base - no sobreescribir los estilos específicos del login */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f6f8;
+  color: #2d3748;
+  min-height: 100vh;
+}
+
+/* Layout principal para escritorio */
+.App {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Contenedor principal sin bordes para escritorio */
+.main-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f6f8;
+}
+
+/* Solo aplicar estilos de login cuando esté en la página de login */
+body.login-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Estilos complementarios para login (no sobreescribir Login.css) */
+.login-background {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-background::before,
+.login-background::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(0.5px);
+  opacity: 0.85;
+}
+
+.login-background::before {
+  width: 360px;
+  height: 360px;
+  background: rgba(255, 111, 0, 0.18);
+  top: -120px;
+  right: -60px;
+}
+
+.login-background::after {
+  width: 260px;
+  height: 260px;
+  background: rgba(69, 69, 70, 0.12);
+  bottom: -80px;
+  left: -40px;
+}
+
+/* Estilos para inputs y botones (complementarios) */
+.text-white-75 {
+  color: rgba(113, 128, 150, 0.8) !important;
+}
+
+.login-footer {
+  font-size: 0.75rem;
+}
+
+/* Resetear contenedores que puedan tener bordes o márgenes no deseados */
+.container-fluid,
+.container {
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+/* Para el dashboard y otras páginas principales */
+.main-content {
+  width: 100%;
+  min-height: calc(100vh - 80px); /* Restar altura del navbar */
+  padding: 2rem !important;
+  margin: 0;
+  background-color: #f5f6f8;
+}
+
+/* Contenedor interno para el contenido con márgenes adecuados */
+.dashboard-section {
+  max-width: 1400px;
+  margin: 0 auto 3rem;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem !important;
+  }
+  
+  .dashboard-section {
+    margin: 0 auto 2rem;
+  }
+  
+  .dashboard-card {
+    padding: 1.5rem;
+  }
+}
+
+.register-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.register-modal {
+  width: 100%;
+  max-width: 640px;
+  border-radius: 1rem;
+}
+
+.register-modal .card-header {
+  background: #0f172a;
+  color: #ffffff;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.register-modal .card-body {
+  padding: 1.75rem;
+}
+
+.recovery-modal {
+  max-width: 460px;
+  border-radius: 1.25rem;
+  border: none;
+  overflow: hidden;
+  box-shadow: 0 28px 48px rgba(0, 38, 115, 0.18);
+}
+
+.recovery-modal__header {
+  background: linear-gradient(135deg, rgba(0, 38, 115, 0.92), rgba(255, 111, 0, 0.95));
+  border-bottom: none;
+  padding: 1.25rem 1.5rem;
+}
+
+.recovery-modal__body {
+  padding: 2rem 2.25rem 2.5rem;
+  background: radial-gradient(circle at top left, rgba(255, 111, 0, 0.08), rgba(15, 23, 42, 0.02));
+}
+
+.recovery-modal__description {
+  color: rgba(69, 69, 70, 0.8);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.recovery-modal__callout {
+  color: #002673;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+}
+
+.recovery-modal__button {
+  background: linear-gradient(135deg, #ff6f00, #ff8a33);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.9rem 2.5rem;
+  border-radius: 999px;
+  box-shadow: 0 20px 36px rgba(255, 111, 0, 0.28);
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recovery-modal__button:hover,
+.recovery-modal__button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 40px rgba(255, 111, 0, 0.32);
+}
+
+.data-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  min-width: 680px;
+}
+
+.data-table td,
+.data-table th {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.data-table td {
+  max-width: 220px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .data-table {
+    min-width: 100%;
+  }
+
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table tbody tr {
+    display: block;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .data-table tbody tr th,
+  .data-table tbody tr td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .data-table tbody tr td:last-child,
+  .data-table tbody tr th:last-child {
+    border-bottom: none;
+  }
+
+  .data-table tbody tr td::before,
+  .data-table tbody tr th::before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 1rem;
+    text-transform: capitalize;
+    color: #4a5568;
+  }
+
+  .data-table tbody tr th {
+    background-color: #0f172a;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}

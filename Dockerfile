@@ -7,15 +7,15 @@ EXPOSE 443
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["ExcelProcessorApi.csproj", "."]
-RUN dotnet restore "ExcelProcessorApi.csproj"
+COPY ["TruperBack/TruperBack.csproj", "TruperBack/"]
+RUN dotnet restore "TruperBack/TruperBack.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "ExcelProcessorApi.csproj" -c Release -o /app/build
+WORKDIR "/src/TruperBack"
+RUN dotnet build "TruperBack.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "ExcelProcessorApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "TruperBack.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Final stage
 FROM base AS final
@@ -30,4 +30,4 @@ USER appuser
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:80
 
-ENTRYPOINT ["dotnet", "ExcelProcessorApi.dll"]
+ENTRYPOINT ["dotnet", "TruperBack.dll"]

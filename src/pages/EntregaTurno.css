@@ -1,0 +1,1349 @@
+:root {
+  --turno-bg: #f8fafc;
+  --turno-card-bg: #ffffff;
+  --turno-accent: #3b82f6;
+  --turno-accent-rgb: 59, 130, 246;
+  --turno-border: #e2e8f0;
+  --turno-text: #1e293b;
+  --turno-muted: #64748b;
+  --turno-success: #10b981;
+  --turno-warning: #f59e0b;
+  --turno-danger: #ef4444;
+  --turno-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --turno-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  background-color: var(--turno-bg);
+  color: var(--turno-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.turno-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.turno-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.turno-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--turno-text);
+  margin: 0;
+}
+
+.turno-subtitle {
+  color: var(--turno-muted);
+  font-size: 1rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.turno-card {
+  background: var(--turno-card-bg);
+  border: 1px solid var(--turno-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--turno-shadow);
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.turno-card:hover {
+  box-shadow: var(--turno-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-turno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+  gap: 0.5rem;
+}
+
+.btn-turno--primary {
+  background: var(--turno-accent);
+  color: white;
+}
+
+.btn-turno--primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-turno--outline {
+  background: transparent;
+  color: var(--turno-accent);
+  border: 1px solid var(--turno-accent);
+}
+
+.btn-turno--outline:hover {
+  background: var(--turno-accent);
+  color: white;
+}
+
+.btn-turno--success {
+  background: var(--turno-success);
+  color: white;
+}
+
+.btn-turno--success:hover {
+  background: #059669;
+}
+
+.btn-turno--danger {
+  background: var(--turno-danger);
+  color: white;
+}
+
+.btn-turno--danger:hover {
+  background: #dc2626;
+}
+
+.turno-form {
+  background: var(--turno-card-bg);
+  border: 1px solid var(--turno-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--turno-shadow);
+}
+
+.turno-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.turno-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.turno-form-label {
+  font-weight: 500;
+  color: var(--turno-text);
+  font-size: 0.875rem;
+}
+
+.turno-form-input,
+.turno-form-textarea,
+.turno-form-select {
+  padding: 0.625rem;
+  border: 1px solid var(--turno-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background: var(--turno-card-bg);
+}
+
+.turno-form-input:focus,
+.turno-form-textarea:focus,
+.turno-form-select:focus {
+  outline: none;
+  border-color: var(--turno-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.turno-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.turno-note-description {
+  flex: 1;
+  min-height: 60px;
+  padding: 0.75rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--turno-text);
+  resize: vertical;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+}
+
+.turno-note-description:focus {
+  outline: none;
+  border-color: var(--turno-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #ffffff;
+}
+
+.btn-turno--danger.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-width: auto;
+  height: auto;
+  line-height: 1.2;
+}
+
+.turno-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .turno-notes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1201px) and (max-width: 1400px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1401px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .turno-notes-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.turno-notes-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .turno-notes-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.turno-note-card {
+  background: var(--turno-card-bg);
+  border: 1px solid var(--turno-border);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: var(--turno-shadow);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
+.turno-note-card:hover {
+  box-shadow: var(--turno-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.turno-note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1.5rem 0.75rem 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  position: relative;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.turno-note-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.turno-note-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(59, 130, 246, 0.01) 100%);
+  pointer-events: none;
+}
+
+.turno-note-title {
+  font-weight: 700;
+  color: var(--turno-text);
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.turno-note-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+  margin-right: 1.5rem;
+}
+
+.turno-note-time {
+  color: var(--turno-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
+.turno-note-content {
+  padding: 1rem 1.5rem;
+  color: var(--turno-text);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(248, 250, 252, 0.7) 100%);
+  flex: 1;
+  overflow: hidden;
+  min-height: 120px;
+}
+
+.turno-note-description {
+  margin-bottom: 1.25rem;
+}
+
+.turno-note-description .turno-form-textarea {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  transition: all 0.3s ease;
+  resize: vertical;
+  min-height: 90px;
+  max-height: 160px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.turno-note-description .turno-form-textarea:focus {
+  border-color: var(--turno-accent);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.turno-note-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%);
+  border-radius: 0 0 12px 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.turno-note-meta-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.turno-note-type-control,
+.turno-note-priority-control,
+.turno-note-status-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.turno-form-label-small {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--turno-text);
+  margin: 0;
+  white-space: nowrap;
+  opacity: 0.8;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.turno-note-status-control .turno-form-select {
+  min-width: 90px;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.turno-note-status-control .turno-status-badge {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.turno-note-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.01) 100%);
+  pointer-events: none;
+}
+
+.turno-note-footer > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 2;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+.turno-form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--turno-text);
+  margin: 0;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.turno-form-select--small {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: var(--turno-text);
+  transition: all 0.2s ease;
+  min-width: 70px;
+  max-width: 80px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  height: auto;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.turno-form-select--small:focus {
+  border-color: var(--turno-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+.turno-form-select {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: var(--turno-text);
+  transition: all 0.2s ease;
+  min-width: 90px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  height: auto;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.turno-form-select:focus {
+  border-color: var(--turno-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+.turno-finalization-info {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 8px;
+  border-left: 3px solid var(--turno-success);
+  font-size: 0.85rem;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.08);
+  width: 100%;
+  text-align: center;
+}
+
+.turno-note-card.cancelado .turno-finalization-info {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-left-color: var(--turno-danger);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+}
+
+.turno-finalization-text {
+  font-weight: 600;
+  color: var(--turno-text);
+  margin: 0;
+}
+
+.turno-acknowledgments-section {
+  margin: 0;
+  padding: 1rem 1.5rem 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 100%);
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  position: relative;
+  border-radius: 0 0 12px 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.turno-acknowledgments-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(59, 130, 246, 0.01) 100%);
+  pointer-events: none;
+}
+
+.turno-acknowledgments-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.turno-acknowledgments-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--turno-text);
+  margin: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%);
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.turno-acknowledgments-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.875rem;
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.turno-acknowledgment-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+  max-width: 180px;
+  flex: 0 0 auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.turno-acknowledgment-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+.turno-acknowledgment-item:hover::before {
+  left: 100%;
+}
+
+.turno-acknowledgment-item:hover {
+  border-color: var(--turno-accent);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.turno-acknowledgment-item input[type="checkbox"]:checked + .turno-acknowledgment-label {
+  color: var(--turno-accent);
+  font-weight: 700;
+}
+
+.turno-acknowledgment-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--turno-accent);
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+}
+
+.turno-acknowledgment-checkbox:checked {
+  animation: checkPulse 0.3s ease;
+}
+
+@keyframes checkPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.turno-acknowledgment-label {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--turno-text);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  z-index: 3;
+}
+
+.turno-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.4);
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.btn-turno {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.btn-turno::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-turno:hover::before {
+  left: 100%;
+}
+
+.btn-turno.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.btn-turno--primary {
+  background: linear-gradient(135deg, var(--turno-accent) 0%, #2563eb 100%);
+  color: white;
+}
+
+.btn-turno--primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-turno--success {
+  background: linear-gradient(135deg, var(--turno-success) 0%, #059669 100%);
+  color: white;
+}
+
+.btn-turno--success:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-turno--danger {
+  background: linear-gradient(135deg, var(--turno-danger) 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-turno--danger:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-turno:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-turno:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.turno-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.turno-badge--success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--turno-success);
+}
+
+.turno-badge--warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--turno-warning);
+}
+
+.turno-badge--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--turno-danger);
+}
+
+.turno-badge--info {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--turno-accent);
+}
+
+.turno-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.turno-grid--cols-1 { grid-template-columns: 1fr; }
+.turno-grid--cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.turno-grid--cols-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.turno-grid--cols-4 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+.turno-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  color: var(--turno-muted);
+}
+
+.turno-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--turno-border);
+  border-top: 2px solid var(--turno-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.turno-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--turno-muted);
+}
+
+.turno-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.turno-empty-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--turno-text);
+}
+
+.turno-empty-description {
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.turno-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--turno-border);
+  padding-bottom: 0;
+}
+
+.turno-tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--turno-muted);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.turno-tab:hover {
+  color: var(--turno-accent);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.turno-tab--active {
+  color: var(--turno-accent);
+  border-bottom-color: var(--turno-accent);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.turno-note-card.programado {
+  border-left: 4px solid var(--turno-warning);
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+.turno-note-card.pendiente {
+  border-left: 4px solid var(--turno-warning);
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+.turno-note-card.en-proceso {
+  border-left: 4px solid var(--turno-warning);
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+.turno-note-card.completado {
+  border-left: 4px solid var(--turno-success);
+  opacity: 0.9;
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+.turno-note-card.cancelado {
+  border-left: 4px solid var(--turno-danger);
+  opacity: 0.8;
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+.turno-note-card.completado .turno-note-content,
+.turno-note-card.cancelado .turno-note-content {
+  opacity: 1;
+}
+
+.turno-note-card.completado .turno-note-content textarea,
+.turno-note-card.cancelado .turno-note-content textarea {
+  min-height: 60px;
+  max-height: 80px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.turno-note-card.completado .turno-acknowledgments-grid,
+.turno-note-card.cancelado .turno-acknowledgments-grid {
+  opacity: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.turno-note-card.completado .turno-acknowledgment-item,
+.turno-note-card.cancelado .turno-acknowledgment-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.turno-filters {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.turno-filters .input-group {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.turno-filters .input-group-text {
+  background: linear-gradient(135deg, var(--turno-accent) 0%, #2563eb 100%);
+  border: none;
+  color: white;
+}
+
+.turno-filters .form-control,
+.turno-filters .form-select {
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.turno-filters .form-control:focus,
+.turno-filters .form-select:focus {
+  border-color: var(--turno-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.turno-pagination {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.turno-pagination .btn-group .btn {
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.turno-pagination .btn-group .btn:hover:not(:disabled) {
+  background-color: var(--turno-accent);
+  border-color: var(--turno-accent);
+  transform: translateY(-1px);
+}
+
+.turno-pagination .btn-group .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.turno-note-card.pendiente .turno-note-content {
+  margin-bottom: 0.5rem;
+}
+
+.turno-note-card.pendiente .turno-note-content textarea {
+  min-height: 60px;
+  max-height: 80px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.turno-note-card.pendiente .turno-acknowledgments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.turno-note-card.pendiente .turno-acknowledgment-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.turno-acknowledgments {
+  border-top: 1px solid var(--turno-border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.turno-acknowledgments-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--turno-text);
+  margin-bottom: 0.75rem;
+}
+
+.turno-acknowledgments-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.turno-acknowledgment-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: fit-content;
+  flex-shrink: 0;
+}
+
+.turno-acknowledgment-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.turno-acknowledgment-item:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.turno-acknowledgment-item:hover::before {
+  opacity: 1;
+}
+
+.turno-acknowledgment-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--turno-accent);
+  border-radius: 3px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.turno-acknowledgment-checkbox:hover {
+  transform: scale(1.05);
+}
+
+.turno-acknowledgment-checkbox:checked {
+  animation: checkboxPulse 0.3s ease;
+}
+
+@keyframes checkboxPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.turno-acknowledgment-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.turno-acknowledgment-label {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--turno-text);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.turno-acknowledgment-label:hover {
+  color: var(--turno-accent);
+}
+
+.turno-acknowledgment-item:has(.turno-acknowledgment-checkbox:checked) .turno-acknowledgment-label {
+  color: var(--turno-accent);
+  font-weight: 600;
+}
+
+.turno-acknowledgment-item:has(.turno-acknowledgment-checkbox:disabled) {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.turno-acknowledgment-item:has(.turno-acknowledgment-checkbox:disabled) .turno-acknowledgment-label {
+  color: var(--turno-muted);
+  cursor: default;
+  font-weight: 400;
+}
+
+.turno-acknowledgment-item:has(.turno-acknowledgment-checkbox:disabled):hover {
+  transform: none;
+  box-shadow: none;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.turno-acknowledgment-time {
+  font-size: 0.75rem;
+  color: var(--turno-muted);
+  white-space: nowrap;
+}
+
+.turno-finalization-info {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid var(--turno-success);
+}
+
+.turno-note-card.cancelado .turno-finalization-info {
+  border-left-color: var(--turno-danger);
+  background-color: #fef2f2;
+}
+
+.turno-finalization-text {
+  font-size: 0.75rem;
+  color: var(--turno-text);
+  font-weight: 500;
+  display: block;
+  line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .turno-container {
+    padding: 0.5rem;
+  }
+  
+  .turno-title {
+    font-size: 1.25rem;
+  }
+  
+  .turno-note-card {
+    padding: 0.75rem;
+  }
+  
+  .turno-form-select,
+  .turno-form-input,
+  .turno-form-textarea {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .turno-acknowledgment-item {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .btn-turno {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .turno-container {
+    padding: 0.75rem;
+  }
+  
+  .turno-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .turno-title {
+    font-size: 1.5rem;
+  }
+  
+  .turno-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .turno-note-card {
+    padding: 1rem;
+  }
+  
+  .turno-note-card.pendiente,
+  .turno-note-card.completado,
+  .turno-note-card.cancelado {
+    min-height: auto;
+    max-height: none;
+    grid-column: 1;
+  }
+  
+  .turno-note-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .turno-note-content textarea {
+    min-height: 80px;
+    max-height: 120px;
+  }
+  
+  .turno-note-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .turno-acknowledgments-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .turno-acknowledgment-item {
+    padding: 0.75rem;
+  }
+  
+  .turno-tabs {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .turno-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-turno {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .btn-turno--sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .turno-form-select,
+  .turno-form-input,
+  .turno-form-textarea {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .turno-container {
+    padding: 1.5rem;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .turno-note-card.pendiente,
+  .turno-note-card.completado,
+  .turno-note-card.cancelado {
+    grid-column: 1 / -1;
+  }
+  
+  .turno-acknowledgments-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1401px) {
+  .turno-container {
+    padding: 2rem;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+  
+  .turno-acknowledgments-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (min-width: 1600px) {
+  .turno-container {
+    max-width: 1600px;
+  }
+  
+  .turno-notes-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

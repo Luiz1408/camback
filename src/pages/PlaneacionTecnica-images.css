@@ -1,0 +1,262 @@
+/* Estilos para subida de imágenes en Planeación Técnica */
+
+/* Sección de imágenes */
+.modern-form-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.modern-form-section-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Contenedor de subida de imágenes */
+.image-upload-container {
+  position: relative;
+  width: 100%;
+}
+
+.image-upload-input {
+  display: none;
+}
+
+.image-upload-label {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #fff;
+  min-height: 150px;
+  position: relative;
+}
+
+.image-upload-label:hover {
+  border-color: #007bff;
+  background: #f8f9ff;
+}
+
+.image-upload-label.has-image {
+  border: 2px solid #28a745 !important;
+  background: #f8fff8 !important;
+  padding: 0 !important;
+  min-height: 150px !important;
+  cursor: default !important;
+}
+
+.image-upload-label.has-image:hover {
+  border-color: #28a745 !important;
+  background: #f8fff8 !important;
+}
+
+.image-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  height: 100%;
+  min-height: 120px;
+}
+
+.image-upload-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.image-upload-text {
+  text-align: center;
+}
+
+.image-upload-title {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.image-upload-subtitle {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+/* Vista previa de imagen */
+.image-preview {
+  position: relative;
+  display: block !important;
+  width: 100% !important;
+  height: 150px !important;
+  overflow: hidden;
+}
+
+.image-preview-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.image-preview-img:hover {
+  transform: scale(1.02);
+}
+
+.image-clear-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s ease;
+}
+
+.image-clear-btn:hover:not(:disabled) {
+  background: rgba(220, 53, 69, 1);
+}
+
+.image-clear-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Grid de imágenes en actividades */
+.planeacion-activity-images {
+  margin: 1rem 0;
+}
+
+.planeacion-activity-images-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.planeacion-activity-images-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.planeacion-activity-image-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.planeacion-activity-image-item:hover {
+  transform: translateY(-2px);
+}
+
+.planeacion-activity-image-item--antes {
+  order: 1;
+}
+
+.planeacion-activity-image-item--despues {
+  order: 2;
+}
+
+.planeacion-activity-images-grid:has(.planeacion-activity-image-item:only-child) {
+  grid-template-columns: 1fr;
+}
+
+.planeacion-activity-images-grid:has(.planeacion-activity-image-item:nth-child(3)) {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.planeacion-activity-image {
+  width: 100% !important;
+  height: 100px !important;
+  object-fit: cover !important;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.planeacion-activity-image:hover {
+  transform: scale(1.05);
+}
+
+.planeacion-activity-image-label {
+  font-size: 0.7rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .planeacion-activity-images-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+  
+  .image-preview-img {
+    height: 120px;
+  }
+  
+  .planeacion-activity-image {
+    height: 80px;
+  }
+}
+
+/* Estados */
+.image-upload-label.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.image-upload-label.error {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.image-preview {
+  animation: fadeIn 0.3s ease;
+}
+
+.planeacion-activity-images {
+  animation: fadeIn 0.5s ease;
+}

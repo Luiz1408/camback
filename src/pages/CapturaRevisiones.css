@@ -1,0 +1,87 @@
+.captura-revisiones-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Estilos para centrar modales */
+.modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1050 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.modal-dialog {
+  margin: 0 !important;
+  max-width: 500px !important;
+  width: 100% !important;
+}
+
+.modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 1040 !important;
+}
+
+/* Estilos para badges de días en espera */
+.bg-orange {
+  background-color: #e55a00 !important;
+  color: white !important;
+}
+
+/* Estilos para los dropdowns */
+.captura-revisiones-container .form-select {
+  color: #212529 !important;
+  background-color: #fff !important;
+  border-color: #ced4da !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.captura-revisiones-container .form-select option {
+  color: #212529 !important;
+  background-color: #fff !important;
+  padding: 8px 12px !important;
+}
+
+.captura-revisiones-container .form-select:focus {
+  color: #212529 !important;
+  background-color: #fff !important;
+  border-color: #86b7fe !important;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Forzar texto visible en dropdowns */
+.captura-revisiones-container select.form-select option {
+  color: #000 !important;
+  background: #fff !important;
+}
+
+.captura-revisiones-container select.form-select {
+  color: #000 !important;
+  background: #fff !important;
+}
+
+/* Estilo específico para Chrome/Safari */
+.captura-revisiones-container select::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
