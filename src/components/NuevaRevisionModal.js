@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ModernModal from './Common/ModernModal';
+import UnifiedModal from './Common/UnifiedModal';
 import AutocompleteDropdown from './AutocompleteDropdown';
 import { getAlmacenUbicacionFolios } from '../services/api';
 import { getCatalogoByTipo, getAllTipos } from '../services/catalogos';
@@ -153,7 +153,7 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
   };
 
   return (
-    <ModernModal
+    <UnifiedModal
       show={isOpen}
       onClose={handleClose}
       title="Nueva Revisión"
@@ -215,7 +215,7 @@ const NuevaRevisionModal = ({ isOpen, onClose, onSubmit, loading }) => {
           {errors.areaQueSolicita && <div className="text-danger small mt-1">{errors.areaQueSolicita}</div>}
         </div>
       </form>
-    </ModernModal>
+    </UnifiedModal>
   );
 };
 

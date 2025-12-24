@@ -7,8 +7,8 @@ const NAV_LINKS = [
   { key: 'revisiones-entregadas', to: '/revisiones-entregadas', label: 'Revisiones entregadas' },
   { key: 'captura-revisiones', to: '/captura-revisiones', label: 'Captura revisiones' },
   { key: 'entrega-turno', to: '/entrega-turno', label: 'Entrega de turno' },
+  { key: 'entrega-turno-monitoreo', to: '/entrega-turno-monitoreo', label: 'Monitoreo entrega' },
   { key: 'planeacion-tecnica', to: '/planeacion-tecnica', label: 'Planeación técnica' },
-  { key: 'cronograma-soporte', to: '/cronograma-soporte', label: 'Cronograma soporte' },
   { key: 'admin-catalogos', to: '/admin-catalogos', label: 'Admin Catálogos' },
   { key: 'charts', to: '/charts', label: 'Ver gráficas' },
 ];
@@ -30,7 +30,21 @@ const MainNavbar = ({
     if (isAdmin) {
       return NAV_LINKS;
     }
-    // Para todos los demás roles, solo mostrar Inicio y Captura Revisiones
+    
+    // Determinar si es coordinador o monitorista
+    const isCoordinador = role === 'Coordinador' || role === 'coordinador' || role === 'Coordinator';
+    const isMonitorista = role === 'Monitorista' || role === 'monitorista' || role === 'Monitor';
+    
+    if (isCoordinador || isMonitorista) {
+      // Coordinadores y monitoristas ven: Inicio, Captura Revisiones, Monitoreo entrega
+      return NAV_LINKS.filter(link => 
+        link.key === 'dashboard' || 
+        link.key === 'captura-revisiones' || 
+        link.key === 'entrega-turno-monitoreo'
+      );
+    }
+    
+    // Para otros roles, solo mostrar Inicio y Captura Revisiones
     return NAV_LINKS.filter(link => 
       link.key === 'dashboard' || link.key === 'captura-revisiones'
     );

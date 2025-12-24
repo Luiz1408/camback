@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://10.110.224.37:8080/api',
+  baseURL: 'http://localhost:5236/api',
 });
 
 let logoutHandler = null;
@@ -188,6 +188,20 @@ export const updateAreaEspecifica = async (id, data) => {
   } catch (error) {
     console.error('Error actualizando área específica:', error);
     throw error;
+  }
+};
+
+// Función para cambiar contraseña de usuario
+export const changePassword = async (userId, newPassword) => {
+  try {
+    const response = await api.put(`/User/${userId}/password`, {
+      newPassword: newPassword
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error('Error cambiando contraseña:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Error al cambiar la contraseña';
+    return { success: false, error: errorMessage };
   }
 };
 

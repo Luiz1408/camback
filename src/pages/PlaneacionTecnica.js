@@ -15,8 +15,8 @@ import {
   deleteTechnicalActivity,
 } from '../services/technicalActivities';
 import api from '../services/api';
-import ModernModal from '../components/Common/ModernModal';
-import '../components/Common/ModernModal.css';
+import UnifiedModal from '../components/Common/UnifiedModal';
+import '../components/Common/UnifiedModal.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import './PlaneacionTecnica.css';
 import './PlaneacionTecnica-images.css';
@@ -1090,7 +1090,7 @@ const PlaneacionTecnica = () => {
         )}
 
         {/* Modal para crear actividad técnica */}
-        <ModernModal
+        <UnifiedModal
           show={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           title="Nueva actividad técnica"
@@ -1286,7 +1286,7 @@ const PlaneacionTecnica = () => {
               disabled={creatingActivity}
             />
           </div>
-        </ModernModal>
+        </UnifiedModal>
 
         {/* Modal para ver imagen */}
         {showImageModal && (

@@ -5344,11 +5344,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAM\\ExcelProcessorApi.csproj",
+      "projectUniqueName": "C:\\Users\\ferna\\Documents\\Truper_CAM\\ExcelProcessorApi.csproj",
       "projectName": "ExcelProcessorApi",
-      "projectPath": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAM\\ExcelProcessorApi.csproj",
+      "projectPath": "C:\\Users\\ferna\\Documents\\Truper_CAM\\ExcelProcessorApi.csproj",
       "packagesPath": "C:\\Users\\ferna\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ferna\\OneDrive\\Documents\\Truper_CAM\\obj\\",
+      "outputPath": "C:\\Users\\ferna\\Documents\\Truper_CAM\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

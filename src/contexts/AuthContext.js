@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import api, { setLogoutHandler } from '../services/api';
+import api, { setLogoutHandler, changePassword } from '../services/api';
 
 const TOKEN_STORAGE_KEY = 'token';
 const USER_STORAGE_KEY = 'user';
@@ -153,12 +153,17 @@ export function AuthProvider({ children }) {
     clearSession();
   };
 
+  const changePasswordHandler = async (userId, newPassword) => {
+    return await changePassword(userId, newPassword);
+  };
+
   const value = {
     currentUser,
     loading,
     login,
     register,
     logout,
+    changePassword: changePasswordHandler,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
