@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUsersByRole } from '../services/api';
 import { getCatalogoByTipo, getAllTipos } from '../services/catalogos';
+import { 
+  getShiftHandOffNotes, 
+  createShiftHandOffNote, 
+  updateShiftHandOffNote, 
+  deleteShiftHandOffNote 
+} from '../services/shiftHandOffService';
+import { toast } from 'react-toastify';
 import AutocompleteDropdown from '../components/AutocompleteDropdown';
 import UnifiedModal from '../components/Common/UnifiedModal';
 import MainNavbar from '../components/Layout/MainNavbar';
@@ -10,13 +17,14 @@ import '../components/Common/UnifiedModal.css';
 import './EntregaTurnoMonitoreo.css';
 
 const EntregaTurnoMonitoreo = () => {
-  console.log('=== COMPONENTE ENTREGA TURNO MONITOREO CARGADO ===');
-  const { currentUser } = useAuth();
+    const { currentUser } = useAuth();
   const [checklistData, setChecklistData] = useState({
     actividadesRelevantes: false,
     detalleActividades: '',
     celular: false,
-    equipoComputo: false,
+    celularTexto: '',
+    laptops: false,
+    laptopsTexto: '',
     aplicativo: false,
     aplicativoTexto: '',
     turnoEntrega: '',
@@ -28,6 +36,15 @@ const EntregaTurnoMonitoreo = () => {
   const [entregas, setEntregas] = useState([]);
   const [turnosOperativos, setTurnosOperativos] = useState([]);
   const [monitoristas, setMonitoristas] = useState([]);
+  const [fechaFiltro, setFechaFiltro] = useState('');
+  const [turnoSeleccionado, setTurnoSeleccionado] = useState('');
+
+  // Definición de turnos
+  const TURNOS = [
+    { id: 'turno1', nombre: 'Turno 1 (6:00 - 14:00)', horaInicio: '06:00', horaFin: '14:00' },
+    { id: 'turno2', nombre: 'Turno 2 (14:00 - 22:00)', horaInicio: '14:00', horaFin: '22:00' },
+    { id: 'turno3', nombre: 'Turno 3 (22:00 - 6:00)', horaInicio: '22:00', horaFin: '06:00' }
+  ];
 
   // Usar currentUser del AuthContext
   const user = currentUser || {
@@ -61,82 +78,73 @@ const EntregaTurnoMonitoreo = () => {
   const displayName = user?.fullName || user?.displayName || user?.username || 'Usuario';
 
   const handleLogout = () => {
-    console.log('Cerrando sesión...');
-    localStorage.removeItem('user');
+        localStorage.removeItem('user');
     localStorage.removeItem('token');
     window.location.href = '/login';
   };
 
   const handleManageUsers = () => {
-    console.log('Gestionar usuarios');
+    // Implementar gestión de usuarios
   };
 
   // Cargar datos dinámicamente desde el backend
 
-  const initialEntregas = [
-    {
-      id: 1,
-      fecha: '2024-01-15',
-      actividadesRelevantes: true,
-      celular: true,
-      equipoComputo: true,
-      aplicativo: false,
-      aplicativoTexto: '',
-      turnoEntrega: 'Turno Matutino (6:00 - 14:00)',
-      quienEntrega: 'Juan Pérez',
-      quienRecibe: 'María González',
-      creadoPor: currentUser?.username || 'Usuario'
-    },
-    {
-      id: 2,
-      fecha: '2024-01-14',
-      actividadesRelevantes: false,
-      celular: true,
-      equipoComputo: true,
-      aplicativo: false,
-      aplicativoTexto: '',
-      turnoEntrega: 'Turno Nocturno (22:00 - 6:00)',
-      quienEntrega: 'Carlos Rodríguez',
-      quienRecibe: 'Ana López',
-      creadoPor: currentUser?.username || 'Usuario'
-    }
-  ];
-
   useEffect(() => {
-    console.log('=== INICIO USEEFECT ===');
-    
+        
     const cargarDatos = async () => {
       try {
-        // Primero ver todos los catálogos disponibles
-        console.log('Verificando todos los catálogos disponibles...');
+        setLoading(true);
+        
+        // Cargar notas de entrega de turno desde el backend
         try {
-          const allCatalogs = await getAllTipos();
-          console.log('Todos los catálogos:', allCatalogs);
-        } catch (err) {
-          console.log('Error obteniendo todos los catálogos:', err.message);
+                    const notasData = await getShiftHandOffNotes();
+                    
+          // Mapear las notas al formato que espera el componente
+          const entregasFromBackend = notasData.map(note => ({
+            id: note.id,
+            fecha: new Date(note.createdAt).toLocaleDateString('en-CA'), // Igual que al crear nuevas entregas
+            actividadesRelevantes: note.status === 'Pendiente' ? false : true,
+            detalleActividades: note.description || '',
+            celular: false, // Estos campos no existen en el backend, se pueden agregar después
+            equipoComputo: false,
+            aplicativo: false,
+            aplicativoTexto: '',
+            turnoEntrega: note.type || 'No especificado',
+            quienEntrega: note.createdBy?.fullName || note.createdBy?.username || 'No especificado',
+            quienRecibe: note.assignedCoordinatorId ? `Coordinador ID: ${note.assignedCoordinatorId}` : 'No asignado',
+            creadoPor: note.createdBy?.fullName || note.createdBy?.username || 'Sistema',
+            status: note.status,
+            priority: note.priority
+          }));
+          
+          setEntregas(entregasFromBackend);
+                  } catch (err) {
+                    // No usar fallback, mostrar mensaje de error
+          toast.error('Error al cargar las entregas de turno. Por favor, inténtalo de nuevo.');
         }
         
-        // Usar el catálogo correcto que encontramos: DET_TURNO_OPERATIVO
-        console.log('Cargando catálogo DET_TURNO_OPERATIVO...');
+        // Primero ver todos los catálogos disponibles
+                try {
+          const allCatalogs = await getAllTipos();
+                  } catch (err) {
+                  }
         
+        // Usar el catálogo correcto que encontramos: DET_TURNO_OPERATIVO
+                
         let turnosData = [];
         
         try {
           const response = await getCatalogoByTipo('DET_TURNO_OPERATIVO');
-          console.log('Respuesta DET_TURNO_OPERATIVO:', response);
-          
+                    
           if (response && response.length > 0) {
             turnosData = response.map(item => item.valor || item.nombre || item.descripcion);
-            console.log('Turnos cargados:', turnosData);
-          }
+                      }
         } catch (err) {
-          console.log('Error con DET_TURNO_OPERATIVO:', err.message);
-        }
+                  }
         
         // Si no encontramos datos, usar datos de ejemplo
         if (turnosData.length === 0) {
-          console.log('Usando datos de ejemplo para turnos');
-          turnosData = [
+                    turnosData = [
             'Turno Matutino (6:00 - 14:00)',
             'Turno Vespertino (14:00 - 22:00)', 
             'Turno Nocturno (22:00 - 6:00)',
@@ -154,43 +162,18 @@ const EntregaTurnoMonitoreo = () => {
             valor: user.valor || user.fullName || user.username
           }));
           setMonitoristas(monitoristasData);
-        } catch (err) {
-          console.log('Error cargando monitoristas, usando ejemplo:', err.message);
-          setMonitoristas([
-            { id: 1, valor: 'Juan Pérez' },
-            { id: 2, valor: 'María González' },
-            { id: 3, valor: 'Carlos Rodríguez' },
-            { id: 4, valor: 'Ana López' },
-            { id: 5, valor: 'Roberto Sánchez' }
-          ]);
-        }
+                  } catch (err) {
+                  }
         
-        setEntregas(initialEntregas);
       } catch (error) {
-        console.error('Error general:', error);
-        // Usar datos de ejemplo en caso de error general
-        setTurnosOperativos([
-          'Turno Matutino (6:00 - 14:00)',
-          'Turno Vespertino (14:00 - 22:00)', 
-          'Turno Nocturno (22:00 - 6:00)',
-          'Turno Administrativo (9:00 - 18:00)'
-        ]);
-        setMonitoristas([
-          { id: 1, valor: 'Juan Pérez' },
-          { id: 2, valor: 'María González' },
-          { id: 3, valor: 'Carlos Rodríguez' },
-          { id: 4, valor: 'Ana López' },
-          { id: 5, valor: 'Roberto Sánchez' }
-        ]);
-        setEntregas(initialEntregas);
+                toast.error('Error al cargar los datos. Por favor, recarga la página.');
       } finally {
         setLoading(false);
       }
     };
     
     cargarDatos();
-    console.log('=== FIN USEEFECT ===');
-  }, []);
+      }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -200,27 +183,126 @@ const EntregaTurnoMonitoreo = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const nuevaEntrega = {
-      id: entregas.length + 1,
-      fecha: new Date().toISOString().split('T')[0],
-      ...checklistData,
-      creadoPor: currentUser?.username || 'Usuario'
-    };
-    setEntregas([nuevaEntrega, ...entregas]);
-    setShowModal(false);
-    setChecklistData({
-      actividadesRelevantes: false,
-      detalleActividades: '',
-      celular: false,
-      equipoComputo: false,
-      aplicativo: false,
-      aplicativoTexto: '',
-      turnoEntrega: '',
-      quienEntrega: '',
-      quienRecibe: ''
-    });
+    
+    // Validación del formulario
+    if (!checklistData.turnoEntrega) {
+      toast.error('Por favor selecciona un turno de entrega');
+      return;
+    }
+    
+    if (!checklistData.quienEntrega) {
+      toast.error('Por favor selecciona quién entrega');
+      return;
+    }
+    
+    if (!checklistData.quienRecibe) {
+      toast.error('Por favor selecciona quién recibe');
+      return;
+    }
+    
+    if (checklistData.aplicativo && !checklistData.aplicativoTexto.trim()) {
+      toast.error('Por favor proporciona el detalle del aplicativo');
+      return;
+    }
+    
+    if (checklistData.celular && !checklistData.celularTexto.trim()) {
+      toast.error('Por favor proporciona el detalle del celular');
+      return;
+    }
+    
+    if (checklistData.laptops && !checklistData.laptopsTexto.trim()) {
+      toast.error('Por favor proporciona el detalle de las laptops');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Preparar los datos para el backend
+      const noteData = {
+        title: `Entrega de Turno - ${checklistData.turnoEntrega}`,
+        description: checklistData.detalleActividades || 'Entrega de turno realizada',
+        status: checklistData.actividadesRelevantes ? 'Completado' : 'Pendiente',
+        type: checklistData.turnoEntrega || 'informativo',
+        priority: 'Media',
+        assignedCoordinatorId: checklistData.quienRecibe ? parseInt(checklistData.quienRecibe) : null,
+        deliveringUserId: checklistData.quienEntrega ? parseInt(checklistData.quienEntrega) : null
+      };
+      
+      // Crear la nota en el backend
+      const newNote = await createShiftHandOffNote(noteData);
+      if (!newNote) {
+        throw new Error('Backend ShiftHandOff no disponible');
+      }
+      
+      // Mapear la respuesta al formato del componente
+      const nuevaEntrega = {
+        id: newNote.id,
+        fecha: new Date().toLocaleDateString('en-CA'), // Formato YYYY-MM-DD local del día actual
+        actividadesRelevantes: newNote.status === 'Completado',
+        detalleActividades: newNote.description || '',
+        celular: checklistData.celular,
+        equipoComputo: checklistData.equipoComputo,
+        aplicativo: checklistData.aplicativo,
+        aplicativoTexto: checklistData.aplicativoTexto,
+        turnoEntrega: newNote.type || checklistData.turnoEntrega,
+        quienEntrega: checklistData.quienEntrega,
+        quienRecibe: checklistData.quienRecibe,
+        creadoPor: currentUser?.username || 'Usuario',
+        status: newNote.status,
+        priority: newNote.priority
+      };
+      
+      // Agregar la nueva entrega al estado local
+      setEntregas([nuevaEntrega, ...entregas]);
+      
+      // Cerrar el modal y limpiar el formulario
+      setShowModal(false);
+      setChecklistData({
+        actividadesRelevantes: false,
+        detalleActividades: '',
+        celular: false,
+        celularTexto: '',
+        laptops: false,
+        laptopsTexto: '',
+        aplicativo: false,
+        aplicativoTexto: '',
+        turnoEntrega: '',
+        quienEntrega: '',
+        quienRecibe: ''
+      });
+      
+      // Mostrar mensaje de éxito
+      toast.success('Entrega de turno guardada correctamente en la base de datos');
+      
+    } catch (error) {
+            toast.error('Error al guardar la entrega de turno. Por favor, inténtalo de nuevo.');
+      
+      // Si hay error, guardar localmente como fallback
+      const nuevaEntrega = {
+        id: entregas.length + 1,
+        fecha: new Date().toISOString().split('T')[0],
+        ...checklistData,
+        creadoPor: currentUser?.username || 'Usuario'
+      };
+      setEntregas([nuevaEntrega, ...entregas]);
+      setShowModal(false);
+      setChecklistData({
+        actividadesRelevantes: false,
+        detalleActividades: '',
+        celular: false,
+        equipoComputo: false,
+        aplicativo: false,
+        aplicativoTexto: '',
+        turnoEntrega: '',
+        quienEntrega: '',
+        quienRecibe: ''
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getBadgeClass = (value) => {
@@ -231,12 +313,97 @@ const EntregaTurnoMonitoreo = () => {
     return value ? 'Sí' : 'No';
   };
 
-  // Debug para verificar los turnos en el render
-  console.log('turnosOperativos en render:', turnosOperativos);
+  // Función para filtrar entregas por fecha y turno
+  const filtrarEntregasPorFechaYTurno = () => {
+    if (!fechaFiltro) return entregas;
 
-  const handleDeleteEntrega = (id) => {
+    const fechaSeleccionada = new Date(fechaFiltro + 'T00:00:00');
+    const diaSiguiente = new Date(fechaSeleccionada);
+    diaSiguiente.setDate(diaSiguiente.getDate() + 1);
+
+    return entregas.filter(entrega => {
+      if (!entrega.fecha) return false;
+      
+      // Usar el mismo formato YYYY-MM-DD para comparar
+      const fechaEntrega = entrega.fecha; // Ya viene en formato YYYY-MM-DD
+      
+      // Filtrar por fecha (incluye el turno de madrugada del día siguiente)
+      if (entrega.turnoEntrega && (entrega.turnoEntrega.includes('22:00') || entrega.turnoEntrega.includes('6:00'))) {
+        // Turno nocturno: puede ser del día seleccionado o del día siguiente
+        const coincide = fechaEntrega === fechaFiltro || 
+                       fechaEntrega === new Date(diaSiguiente).toISOString().split('T')[0];
+        return coincide;
+      } else {
+        // Turnos diurnos: son del mismo día
+        const coincide = fechaEntrega === fechaFiltro;
+        return coincide;
+      }
+    });
+  };
+
+  const entregasFiltradas = filtrarEntregasPorFechaYTurno();
+
+  // Agrupar entregas por turno para mejor visualización
+  const entregasPorTurno = TURNOS.map(turno => {
+    // Filtrar entregas que pertenecen a este turno según la hora
+    const entregasDelTurno = entregasFiltradas.filter(entrega => {
+      if (!entrega.fecha) return false;
+      
+      // Para turno 1 (6:00 - 14:00)
+      if (turno.id === 'turno1') {
+        return entrega.turnoEntrega && (
+          entrega.turnoEntrega.includes('1° Turno') ||
+          entrega.turnoEntrega.includes('06:00') ||
+          entrega.turnoEntrega.includes('6:00')
+        );
+      }
+      // Para turno 2 (14:00 - 22:00)
+      else if (turno.id === 'turno2') {
+        return entrega.turnoEntrega && (
+          entrega.turnoEntrega.includes('2° Turno') ||
+          entrega.turnoEntrega.includes('14:00')
+        );
+      }
+      // Para turno 3 (22:00 - 06:00)
+      else if (turno.id === 'turno3') {
+        return entrega.turnoEntrega && (
+          entrega.turnoEntrega.includes('3° Turno') ||
+          entrega.turnoEntrega.includes('22:00') ||
+          entrega.turnoEntrega.includes('6:00')
+        );
+      }
+      
+      return false;
+    });
+    
+    return {
+      ...turno,
+      entregas: entregasDelTurno
+    };
+  });
+
+  const handleDeleteEntrega = async (id) => {
     if (window.confirm('¿Estás seguro de eliminar esta entrega de turno?')) {
-      setEntregas(entregas.filter(entrega => entrega.id !== id));
+      try {
+        setLoading(true);
+        
+        // Eliminar del backend
+        await deleteShiftHandOffNote(id);
+                
+        // Eliminar del estado local
+        setEntregas(entregas.filter(entrega => entrega.id !== id));
+        
+        // Mostrar mensaje de éxito
+        toast.success('Entrega de turno eliminada correctamente de la base de datos');
+        
+      } catch (error) {
+                toast.error('Error al eliminar la entrega de turno. Por favor, inténtalo de nuevo.');
+        
+        // Si hay error, eliminar localmente como fallback
+        setEntregas(entregas.filter(entrega => entrega.id !== id));
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -283,6 +450,45 @@ const EntregaTurnoMonitoreo = () => {
               </button>
             </div>
             
+            {/* Filtro por fecha */}
+            <div className='card mb-4'>
+              <div className='card-body'>
+                <h6 className='card-title mb-3'>Filtrar por Fecha</h6>
+                <div className='row'>
+                  <div className='col-md-4'>
+                    <label className='form-label'>Seleccionar Fecha</label>
+                    <input
+                      type='date'
+                      className='form-control'
+                      value={fechaFiltro}
+                      onChange={(e) => setFechaFiltro(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]} // Bloquear días futuros
+                    />
+                  </div>
+                  <div className='col-md-8'>
+                    <label className='form-label'>Turnos del Día</label>
+                    <div className='row'>
+                      {TURNOS.map(turno => (
+                        <div key={turno.id} className='col-md-4 mb-2'>
+                          <div className='card border-primary'>
+                            <div className='card-body p-3'>
+                              <h6 className='card-title mb-2'>{turno.nombre}</h6>
+                              <small className='text-muted'>{turno.horaInicio} - {turno.horaFin}</small>
+                              <div className='mt-2'>
+                                <span className='badge bg-info'>
+                                  {entregasPorTurno.find(t => t.id === turno.id)?.entregas.length || 0} entregas
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className='card'>
               <div className='card-body'>
                 <div className='table-responsive'>
@@ -293,17 +499,17 @@ const EntregaTurnoMonitoreo = () => {
                         <th>Actividades Relevantes</th>
                         <th>Detalle Actividades</th>
                         <th>Celular</th>
-                        <th>Equipo de Cómputo</th>
+                        <th>Laptops</th>
                         <th>Aplicativo</th>
                         <th>Turno Entrega</th>
                         <th>Quien Entrega</th>
                         <th>Quien Recibe</th>
-                        <th>Creado Por</th>
-                        <th>Acciones</th>
+                        {isAdmin && <th>Creado Por</th>}
+                        {isAdmin && <th>Acciones</th>}
                       </tr>
                     </thead>
                     <tbody>
-                      {entregas.map(entrega => (
+                      {entregasFiltradas.map(entrega => (
                         <tr key={entrega.id}>
                           <td>{entrega.fecha}</td>
                           <td>
@@ -324,8 +530,8 @@ const EntregaTurnoMonitoreo = () => {
                             </span>
                           </td>
                           <td>
-                            <span className={'badge ' + getBadgeClass(entrega.equipoComputo)}>
-                              {getBadgeText(entrega.equipoComputo)}
+                            <span className={'badge ' + getBadgeClass(entrega.laptops)}>
+                              {getBadgeText(entrega.laptops)}
                             </span>
                           </td>
                           <td>
@@ -341,11 +547,13 @@ const EntregaTurnoMonitoreo = () => {
                           <td>{entrega.turnoEntrega}</td>
                           <td>{entrega.quienEntrega}</td>
                           <td>{entrega.quienRecibe}</td>
-                          <td>
-                            <small className='text-muted'>{entrega.creadoPor}</small>
-                          </td>
-                          <td>
-                            {isAdmin && (
+                          {isAdmin && (
+                            <td>
+                              <small className='text-muted'>{entrega.creadoPor}</small>
+                            </td>
+                          )}
+                          {isAdmin && (
+                            <td>
                               <button
                                 className='btn btn-sm btn-outline-danger'
                                 onClick={() => handleDeleteEntrega(entrega.id)}
@@ -353,8 +561,8 @@ const EntregaTurnoMonitoreo = () => {
                               >
                                 <i className='fas fa-trash'></i>
                               </button>
-                            )}
-                          </td>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -376,24 +584,17 @@ const EntregaTurnoMonitoreo = () => {
         loading={false}
       >
         <form onSubmit={handleSubmit}>
+          {/* Sección de Dispositivos */}
+          <div className='row mb-3'>
+            <div className='col-12'>
+              <h6 className='mb-3'>Dispositivos</h6>
+            </div>
+          </div>
+          
           <div className='row mb-3'>
             <div className='col-md-6'>
-              <div className='form-check'>
-                <input
-                  className='form-check-input'
-                  type='checkbox'
-                  name='actividadesRelevantes'
-                  id='actividadesRelevantes'
-                  checked={checklistData.actividadesRelevantes}
-                  onChange={handleInputChange}
-                />
-                <label className='form-check-label' htmlFor='actividadesRelevantes'>
-                  Actividades Relevantes
-                </label>
-              </div>
-            </div>
-            <div className='col-md-6'>
-              <div className='form-check'>
+              <h6 className='mb-2'>Celular</h6>
+              <div className='form-check mb-2'>
                 <input
                   className='form-check-input'
                   type='checkbox'
@@ -403,7 +604,83 @@ const EntregaTurnoMonitoreo = () => {
                   onChange={handleInputChange}
                 />
                 <label className='form-check-label' htmlFor='celular'>
-                  Celular
+                  Todo OK
+                </label>
+              </div>
+              {!checklistData.celular && (
+                <textarea
+                  className='form-control'
+                  name='celularTexto'
+                  value={checklistData.celularTexto || ''}
+                  onChange={handleInputChange}
+                  placeholder='Describa las incidencias del celular...'
+                  rows='3'
+                />
+              )}
+            </div>
+            <div className='col-md-6'>
+              <h6 className='mb-2'>Laptops</h6>
+              <div className='form-check mb-2'>
+                <input
+                  className='form-check-input'
+                  type='checkbox'
+                  name='laptops'
+                  id='laptops'
+                  checked={checklistData.laptops}
+                  onChange={handleInputChange}
+                />
+                <label className='form-check-label' htmlFor='laptops'>
+                  Todo OK
+                </label>
+              </div>
+              {!checklistData.laptops && (
+                <textarea
+                  className='form-control'
+                  name='laptopsTexto'
+                  value={checklistData.laptopsTexto || ''}
+                  onChange={handleInputChange}
+                  placeholder='Describa las incidencias de las laptops...'
+                  rows='3'
+                />
+              )}
+            </div>
+          </div>
+          
+          {/* Sección de Actividades Relevantes */}
+          <div className='row mb-3'>
+            <div className='col-12'>
+              <h6 className='mb-3'>Actividades Relevantes</h6>
+            </div>
+          </div>
+          
+          <div className='row mb-3'>
+            <div className='col-md-6'>
+              <div className='form-check'>
+                <input
+                  className='form-check-input'
+                  type='checkbox'
+                  name='actividadesRelevantes'
+                  id='actividadesRelevantesNo'
+                  checked={!checklistData.actividadesRelevantes}
+                  onChange={() => setChecklistData(prev => ({...prev, actividadesRelevantes: false}))}
+                />
+                <label className='form-check-label' htmlFor='actividadesRelevantesNo'>
+                  No
+                </label>
+              </div>
+            </div>
+            <div className='col-md-6'>
+              <div className='form-check'>
+                <input
+                  className='form-check-input'
+                  type='checkbox'
+                  name='actividadesRelevantes'
+                  id='actividadesRelevantesSi'
+                  checked={checklistData.actividadesRelevantes}
+                  onChange={() => setChecklistData(prev => ({...prev, actividadesRelevantes: true}))}
+                />
+                <label className='form-check-label' htmlFor='actividadesRelevantesSi'>
+                  Sí
                 </label>
               </div>
             </div>
@@ -425,24 +702,6 @@ const EntregaTurnoMonitoreo = () => {
             </div>
           )}
           
-          <div className='row mb-3'>
-            <div className='col-md-6'>
-              <div className='form-check'>
-                <input
-                  className='form-check-input'
-                  type='checkbox'
-                  name='equipoComputo'
-                  id='equipoComputo'
-                  checked={checklistData.equipoComputo}
-                  onChange={handleInputChange}
-                />
-                <label className='form-check-label' htmlFor='equipoComputo'>
-                  Equipo de Cómputo
-                </label>
-              </div>
-            </div>
-          </div>
-          
           {/* Sección de Aplicativos */}
           <div className='row mb-3'>
             <div className='col-12'>
@@ -451,7 +710,7 @@ const EntregaTurnoMonitoreo = () => {
           </div>
           
           <div className='row mb-3'>
-            <div className='col-md-6'>
+            <div className='col-12'>
               <div className='form-check mb-2'>
                 <input
                   className='form-check-input'
@@ -462,17 +721,17 @@ const EntregaTurnoMonitoreo = () => {
                   onChange={handleInputChange}
                 />
                 <label className='form-check-label' htmlFor='aplicativo'>
-                  <strong>Todo OK</strong>
+                  <strong>Sin Incidencias</strong>
                 </label>
               </div>
               {!checklistData.aplicativo && (
                 <textarea
-                  className='form-control form-control-sm ms-4'
+                  className='form-control'
                   name='aplicativoTexto'
                   value={checklistData.aplicativoTexto}
                   onChange={handleInputChange}
                   placeholder='Describa el estado del aplicativo...'
-                  rows='2'
+                  rows='3'
                 />
               )}
             </div>

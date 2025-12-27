@@ -34,7 +34,6 @@ ChartJS.register(
 );
 
 // Verificar que el plugin Filler esté disponible
-console.log('Chart.js Filler plugin disponible:', ChartJS.plugins && ChartJS.plugins.has(Filler));
 
 const STATUS_CONFIG = [
   { key: 'cancelada', label: 'Cancelada', color: '#ef476f', background: 'rgba(239, 71, 111, 0.25)' },
@@ -77,12 +76,10 @@ const generateWeeks = (year = null) => {
   const targetYear = year || new Date().getFullYear();
   const now = new Date();
   
-  console.log('Generando semanas para año:', targetYear);
-  
+    
   // Obtener el número de semana actual
   const currentWeek = getISOWeekNumber(now);
-  console.log('Semana actual:', currentWeek);
-  
+    
   for (let week = 1; week <= currentWeek; week++) {
     // Calcular el inicio de la semana usando ISO 8601
     const firstDayOfYear = new Date(targetYear, 0, 1);
@@ -103,8 +100,7 @@ const generateWeeks = (year = null) => {
       break;
     }
     
-    console.log(`Semana ${week}: ${startOfWeek.toISOString().split('T')[0]} - ${endOfWeek.toISOString().split('T')[0]}`);
-    
+        
     weeks.push({
       value: week,
       label: `Semana ${week} (${startOfWeek.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' })} - ${endOfWeek.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' })})`,
@@ -228,12 +224,12 @@ const generateAvailableMonths = (year = null) => {
       return;
     }
     months.push({
-      value: `${monthName} ${targetYear}`,
-      label: `${monthName} ${targetYear}`
+      value: `${monthName} de ${targetYear}`,
+label: `${monthName} de ${targetYear}`
     });
   });
   
-  return months;
+  return months.reverse(); // Meses más recientes primero
 };
 
 const CapturaRevisiones = () => {
@@ -458,8 +454,7 @@ const CapturaRevisiones = () => {
   const isAdmin = user?.role === 'Administrador' || user?.role === 'admin';
 
   const handleLogout = () => {
-    console.log('Cerrando sesión...');
-    localStorage.removeItem('user');
+        localStorage.removeItem('user');
     localStorage.removeItem('token');
     window.location.href = '/login';
   };
@@ -473,8 +468,7 @@ const CapturaRevisiones = () => {
 
   // Funciones para el modal de feedback
   const showFeedback = (title, message, type = 'success', options = {}) => {
-    console.log('showFeedback llamado con:', { title, message, type, options });
-    const newFeedback = {
+        const newFeedback = {
       visible: true,
       title,
       message,
@@ -484,8 +478,7 @@ const CapturaRevisiones = () => {
       confirmLabel: options.confirmLabel || 'Aceptar'
     };
     setModalFeedback(newFeedback);
-    console.log('modalFeedback establecido a:', newFeedback);
-  };
+      };
 
   const closeFeedback = () => {
     setModalFeedback({ ...modalFeedback, visible: false });
@@ -517,13 +510,11 @@ const CapturaRevisiones = () => {
 
   // Efecto para depurar el estado de modalFeedback
   useEffect(() => {
-    console.log('modalFeedback cambió:', modalFeedback);
-  }, [modalFeedback]);
+      }, [modalFeedback]);
 
   // Efecto para depurar el estado de showDeleteConfirm
   useEffect(() => {
-    console.log('showDeleteConfirm cambió:', showDeleteConfirm);
-  }, [showDeleteConfirm]);
+      }, [showDeleteConfirm]);
 
   useEffect(() => {
     cargarDatos();
@@ -611,27 +602,23 @@ const CapturaRevisiones = () => {
     // Verificar si hay token antes de cargar datos
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('No hay token, redirigiendo al login...');
-      window.location.href = '/login';
+            window.location.href = '/login';
       return;
     }
 
     try {
       const monitoristasData = await getUsersByRole('Monitorista');
-      console.log('Monitoristas cargados:', monitoristasData);
-      setMonitoristas(monitoristasData);
+            setMonitoristas(monitoristasData);
       
       const revisionesData = await getRevisiones();
-      console.log('Revisiones cargadas:', revisionesData);
-      setRevisiones(revisionesData);
+            setRevisiones(revisionesData);
       const mapping = buildMonitoristaMap(revisionesData, monitoristasData);
       setMonitoristaSeleccionadoIds(mapping);
     } catch (error) {
       console.error('Error cargando datos:', error);
       // Si hay error de autenticación, redirigir al login
       if (error.response?.status === 401 || error.response?.status === 403) {
-        console.log('Error de autenticación, redirigiendo al login...');
-        localStorage.removeItem('user');
+                localStorage.removeItem('user');
         localStorage.removeItem('token');
         window.location.href = '/login';
         return;
@@ -665,8 +652,7 @@ const CapturaRevisiones = () => {
   const handleSubmitRevision = async (formData) => {
     setLoading(true);
     try {
-      console.log('Datos de la revisión:', formData);
-      
+            
       const revisionData = {
         titulo: formData.titulo,
         fechaRegistro: new Date().toISOString().split('T')[0],
@@ -680,8 +666,7 @@ const CapturaRevisiones = () => {
       };
       
       const response = await createRevision(revisionData);
-      console.log('Revisión guardada:', response);
-      
+            
       // La respuesta del backend incluye el ID, creamos el objeto completo
       const nuevaRevision = {
         id: response.id,
@@ -731,8 +716,7 @@ const CapturaRevisiones = () => {
   const showDeleteModal = (revisionId) => {
     // Solo mostrar modal si estamos en la pestaña de tablas
     if (activeTab !== 'tabla') {
-      console.log('Modal de eliminación bloqueado: no está en la pestaña de tablas');
-      return;
+            return;
     }
     
     const modal = document.createElement('div');
@@ -795,8 +779,7 @@ const CapturaRevisiones = () => {
     console.log('Usuario:', user);
     
     if (!isAdmin) {
-      console.log('Acceso denegado - no es admin');
-      showFeedback(
+            showFeedback(
         'Acceso restringido',
         'Solo un administrador puede eliminar revisiones capturadas.',
         'warning'
@@ -804,8 +787,7 @@ const CapturaRevisiones = () => {
       return;
     }
 
-    console.log('Mostrando confirmación de eliminación');
-    showDeleteModal(revisionId);
+        showDeleteModal(revisionId);
   };
 
   const handleFechaIncidenteChange = async (revisionId, nuevaFecha) => {
@@ -1056,12 +1038,24 @@ const CapturaRevisiones = () => {
 
   const topAlmacenes = useMemo(() => {
     const counts = {};
-    const revisionesFiltradas = mesSeleccionadoTopAlmacenes
-      ? revisionesFiltradasParaGraficas.filter((r) => {
-          const mes = new Date(r.fechaRegistro).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
-          return mes === mesSeleccionadoTopAlmacenes;
-        })
-      : revisionesFiltradasParaGraficas;
+    let revisionesFiltradas = revisionesFiltradasParaGraficas;
+
+// Aplicar filtro de mes si está seleccionado
+if (mesSeleccionadoTopAlmacenes) {
+  revisionesFiltradas = revisionesFiltradas.filter((r) => {
+    // CORRECCIÓN: Filtro de mes por número
+    const fecha = new Date(r.fechaRegistro);
+    const mesRevision = fecha.getMonth(); // 0-11
+    const añoRevision = fecha.getFullYear();
+    
+    // Parsear mesSeleccionadoTopAlmacenes "Diciembre de 2025"
+    const [mesNombre, , añoStr] = mesSeleccionadoTopAlmacenes.split(' ');
+    const mesSeleccionado = MESES_ORDEN.indexOf(mesNombre); // 0-11
+    const añoSeleccionado = parseInt(añoStr);
+    
+    return mesRevision === mesSeleccionado && añoRevision === añoSeleccionado;
+  });
+}
 
     revisionesFiltradas.forEach((revision) => {
       if (!revision.almacen) return;
@@ -1099,13 +1093,17 @@ const CapturaRevisiones = () => {
   const mesesDisponibles = useMemo(() => {
     const mesesSet = new Set();
     revisionesFiltradasParaGraficas.forEach((r) => {
-      const mes = new Date(r.fechaRegistro).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
-      mesesSet.add(mes);
+      const fecha = new Date(r.fechaRegistro);
+      const mesNombre = MESES_ORDEN[fecha.getMonth()];
+      const año = fecha.getFullYear();
+      const mesFormateado = `${mesNombre} de ${año}`;
+      mesesSet.add(mesFormateado);
     });
     return Array.from(mesesSet).sort((a, b) => {
-      const dateA = new Date(a.split(' ')[1], a.split(' ')[0].split(' ')[0] - 1);
-      const dateB = new Date(b.split(' ')[1], b.split(' ')[0].split(' ')[0] - 1);
-      return dateB - dateA;
+      // CORRECCIÓN: Ordenamiento correcto de meses
+      const dateA = new Date(`${a} 1`);
+      const dateB = new Date(`${b} 1`);
+      return dateB - dateA; // Más recientes primero
     });
   }, [revisionesFiltradasParaGraficas]);
 
@@ -1477,12 +1475,27 @@ const CapturaRevisiones = () => {
         const revisionDate = fecha.toISOString().split('T')[0];
         if (revisionDate !== selectedDay) return;
       } else if (chartTimeTab === 'semana' && selectedWeek) {
-        const semanaInicio = new Date(fecha);
-        semanaInicio.setDate(fecha.getDate() - fecha.getDay());
-        const semanaNum = Math.ceil((semanaInicio - new Date(semanaInicio.getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
-        if (semanaNum.toString() !== selectedWeek) return;
+        // Usar la misma lógica que generateWeeks para calcular la semana
+        const weeks = generateWeeks(fecha.getFullYear());
+        const weekData = weeks.find(w => w.value === parseInt(selectedWeek));
+        if (weekData) {
+          if (fecha < weekData.start || fecha > weekData.end) return;
+        } else {
+          return;
+                }
       } else if (chartTimeTab === 'año' && selectedYear) {
         if (fecha.getFullYear().toString() !== selectedYear) return;
+      } else if (chartTimeTab === 'mes' && mesSeleccionadoTopAlmacenes) {
+        // CORRECCIÓN: Filtro de mes por número
+        const mesRevision = fecha.getMonth(); // 0-11
+        const añoRevision = fecha.getFullYear();
+        
+        // Parsear mesSeleccionadoTopAlmacenes "Diciembre de 2025"
+        const [mesNombre, , añoStr] = mesSeleccionadoTopAlmacenes.split(' ');
+        const mesSeleccionado = MESES_ORDEN.indexOf(mesNombre); // 0-11
+        const añoSeleccionado = parseInt(añoStr);
+        
+        if (mesRevision !== mesSeleccionado || añoRevision !== añoSeleccionado) return;
       }
       
       almacenesCount[revision.almacen] = (almacenesCount[revision.almacen] || 0) + 1;
@@ -1492,7 +1505,7 @@ const CapturaRevisiones = () => {
       .sort(([,a], [,b]) => b - a)
       .slice(0, 8)
       .map(([almacen, total]) => ({ almacen, total }));
-  }, [revisionesFiltradasParaGraficas, chartTimeTab, selectedDay, selectedWeek, selectedYear]);
+  }, [revisionesFiltradasParaGraficas, chartTimeTab, selectedDay, selectedWeek, selectedYear, mesSeleccionadoTopAlmacenes]);
 
   // Datos para gráfica de almacenes filtrados
   const almacenesChartDataByPeriod = useMemo(() => ({

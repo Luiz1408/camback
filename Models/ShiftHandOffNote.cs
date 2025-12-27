@@ -30,6 +30,11 @@ namespace ExcelProcessorApi.Models
 
         public int? AssignedCoordinatorId { get; set; }
 
+        // public int? DeliveringUserId { get; set; }
+        //
+        // [ForeignKey(nameof(DeliveringUserId))]
+        // public User? DeliveringUser { get; set; }
+
         [ForeignKey(nameof(AssignedCoordinatorId))]
         public User? AssignedCoordinator { get; set; }
 

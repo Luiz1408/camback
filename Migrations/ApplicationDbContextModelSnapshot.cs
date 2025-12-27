@@ -49,7 +49,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("UploadId");
 
-                    b.ToTable("Detecciones");
+                    b.ToTable("Detecciones", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.ExcelData", b =>
@@ -124,7 +124,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("UploadedByUserId");
 
-                    b.ToTable("ExcelData");
+                    b.ToTable("ExcelData", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.ExcelUpload", b =>
@@ -168,7 +168,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("UploadedByUserId");
 
-                    b.ToTable("ExcelUploads");
+                    b.ToTable("ExcelUploads", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.Revision", b =>
@@ -198,7 +198,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("UploadId");
 
-                    b.ToTable("Revisiones");
+                    b.ToTable("Revisiones", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.Role", b =>
@@ -223,7 +223,7 @@ namespace ExcelProcessorApi.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -284,7 +284,7 @@ namespace ExcelProcessorApi.Migrations
                     b.HasIndex("NoteId", "CoordinatorUserId")
                         .IsUnique();
 
-                    b.ToTable("ShiftHandOffAcknowledgements");
+                    b.ToTable("ShiftHandOffAcknowledgements", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.ShiftHandOffNote", b =>
@@ -380,7 +380,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("FinalizedByUserId");
 
-                    b.ToTable("ShiftHandOffNotes");
+                    b.ToTable("ShiftHandOffNotes", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.TechnicalActivity", b =>
@@ -438,7 +438,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("TechnicalActivities");
+                    b.ToTable("TechnicalActivities", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.TechnicalActivityImage", b =>
@@ -499,7 +499,7 @@ namespace ExcelProcessorApi.Migrations
 
                     b.HasIndex("TechnicalActivityId");
 
-                    b.ToTable("TechnicalActivityImages");
+                    b.ToTable("TechnicalActivityImages", (string)null);
                 });
 
             modelBuilder.Entity("ExcelProcessorApi.Models.User", b =>
@@ -551,7 +551,7 @@ namespace ExcelProcessorApi.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new

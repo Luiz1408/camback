@@ -32,6 +32,8 @@ namespace ExcelProcessorApi.Models.DTOs
 
         public int? AssignedCoordinatorId { get; set; }
 
+        public int? DeliveringUserId { get; set; }
+
         // Campos para finalización
         public string? FinalizedAt { get; set; }
         public int? FinalizedByUserId { get; set; }
