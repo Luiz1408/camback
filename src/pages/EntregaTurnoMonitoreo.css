@@ -35,15 +35,15 @@
 }
 
 .stat-icon.bg-success {
-  background: linear-gradient(135deg, #28a745, #1e7e34);
+  background: linear-gradient(135deg, #dc3545, #c82333);
 }
 
 .stat-icon.bg-warning {
-  background: linear-gradient(135deg, #ffc107, #e0a800);
+  background: linear-gradient(135deg, #28a745, #1e7e34);
 }
 
 .stat-icon.bg-danger {
-  background: linear-gradient(135deg, #dc3545, #c82333);
+  background: linear-gradient(135deg, #ffc107, #e0a800);
 }
 
 .stat-number {
@@ -122,18 +122,18 @@
 }
 
 .badge-success {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-warning {
   background-color: #d4edda;
   color: #155724;
 }
 
-.badge-warning {
+.badge-danger {
   background-color: #fff3cd;
   color: #856404;
-}
-
-.badge-danger {
-  background-color: #f8d7da;
-  color: #721c24;
 }
 
 .badge-secondary {
@@ -143,15 +143,15 @@
 
 /* Iconos de estado */
 .icon-success {
-  color: #28a745;
+  color: #dc3545;
 }
 
 .icon-warning {
-  color: #ffc107;
+  color: #28a745;
 }
 
 .icon-danger {
-  color: #dc3545;
+  color: #ffc107;
 }
 
 .icon-secondary {

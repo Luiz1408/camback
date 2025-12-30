@@ -1,191 +1,136 @@
-/* Modal Moderno - Basado en diseño de Soporte */
-.modern-modal-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  z-index: 99999 !important;
-  padding: 20px;
-  backdrop-filter: blur(4px);
+.modern-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .modern-modal {
-  background-color: white !important;
-  border-radius: 12px !important;
-  max-width: 700px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-  transform: scale(1);
-  animation: modalSlideIn 0.3s ease-out;
+  animation: slideIn 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.modern-modal__header {
+.modern-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 12px 12px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 30px 20px 30px;
-  border-bottom: 1px solid #e5e7eb;
 }
 
-.modern-modal__title {
-  margin: 0;
-  font-size: 1.5rem;
+.modern-modal-title {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: #2c3e50;
+  margin: 0;
 }
 
-.modern-modal__close {
+.modern-modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
+  color: #6c757d;
   cursor: pointer;
-  color: #6b7280;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease-in-out;
 }
 
-.modern-modal__close:hover {
-  background-color: #f3f4f6;
-  color: #374151;
+.modern-modal-close:hover {
+  background-color: #e9ecef;
+  color: #495057;
 }
 
-.modern-modal__close:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.modern-modal-body {
+  padding: 1.5rem;
 }
 
-.modern-modal__body {
-  padding: 20px 30px;
-}
-
-.modern-modal__footer {
+.modern-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+  border-radius: 0 0 12px 12px;
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  padding: 20px 30px 30px 30px;
-  border-top: 1px solid #e5e7eb;
+  gap: 0.5rem;
 }
 
-/* Formularios dentro del modal */
-.modern-form-group {
-  margin-bottom: 15px;
+.modern-modal-btn {
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
 }
 
-.modern-form-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #374151;
+.modern-modal-btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
 }
 
-.modern-form-input,
-.modern-form-select,
-.modern-form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  background-color: white;
+.modern-modal-btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  transform: translateY(-1px);
 }
 
-.modern-form-input:focus,
-.modern-form-select:focus,
-.modern-form-textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.modern-modal-btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
 }
 
-.modern-form-textarea {
-  min-height: 80px;
-  resize: vertical;
+.modern-modal-btn-secondary:hover {
+  background-color: #545b62;
+  border-color: #545b62;
+  transform: translateY(-1px);
 }
 
-.modern-form-input:disabled,
-.modern-form-select:disabled,
-.modern-form-textarea:disabled {
-  background-color: #f9fafb;
-  color: #6b7280;
-  cursor: not-allowed;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Grid layouts para formularios */
-.modern-form-grid {
-  display: grid;
-  gap: 15px;
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.modern-form-grid--2 {
-  grid-template-columns: 1fr 1fr;
-}
-
-.modern-form-grid--3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .modern-modal-overlay {
-    padding: 10px !important;
-  }
-  
   .modern-modal {
-    width: 95% !important;
-    margin: 0 !important;
-    max-width: none !important;
+    width: 95%;
+    margin: 1rem;
   }
   
-  .modern-modal__header {
-    padding: 20px 20px 15px 20px;
+  .modern-modal-header,
+  .modern-modal-body,
+  .modern-modal-footer {
+    padding: 1rem;
   }
-  
-  .modern-modal__body {
-    padding: 15px 20px;
-  }
-  
-  .modern-modal__footer {
-    padding: 15px 20px 20px 20px;
-    flex-direction: column;
-  }
-  
-  .modern-form-grid--2,
-  .modern-form-grid--3 {
-    grid-template-columns: 1fr;
-  }
-  
-  .modern-modal__title {
-    font-size: 1.25rem;
-  }
-}
-
-/* Asegurar que el modal esté por encima de todo */
-.modern-modal-overlay * {
-  box-sizing: border-box;
-}
-
-/* Prevenir conflicts con otros modales */
-.planeacion-modal,
-.turno-modal {
-  display: none !important;
 }
