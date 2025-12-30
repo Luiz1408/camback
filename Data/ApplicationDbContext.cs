@@ -139,10 +139,6 @@ namespace ExcelProcessorApi.Data
                     .HasMaxLength(500)
                     .IsRequired(false);
 
-                entity.Property(e => e.Status)
-                    .HasMaxLength(50)
-                    .HasDefaultValue("Pendiente");
-
                 entity.Property(e => e.CreatedAt)
                     .HasDefaultValueSql("GETUTCDATE()");
 

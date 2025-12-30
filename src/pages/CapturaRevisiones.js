@@ -422,6 +422,7 @@ const CapturaRevisiones = () => {
   const [filtroArea, setFiltroArea] = useState('');
   const [filtroQuienRealiza, setFiltroQuienRealiza] = useState('');
   const [filtroEstatus, setFiltroEstatus] = useState('');
+  const [filtroTitulo, setFiltroTitulo] = useState('');
   const [filtroUbicacionGraficas, setFiltroUbicacionGraficas] = useState('');
   const [modalFeedback, setModalFeedback] = useState({
     visible: false,
@@ -950,6 +951,17 @@ const CapturaRevisiones = () => {
     return 'rojo';
   };
 
+  // Función para normalizar texto (quitar acentos y caracteres especiales)
+  const normalizarTexto = (texto) => {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Quitar acentos
+      .replace(/[.,;:¡!¿?'""()\/\\&%$#@*+=~`^|<>{}[\]]/g, '') // Quitar caracteres especiales
+      .replace(/\s+/g, ' ') // Reemplazar múltiples espacios por uno solo
+      .trim();
+  };
+
   const revisionesFiltradas = revisiones.filter(revision => {
     const dias = calcularDiasEspera(revision.fechaIncidente);
     const color = getColorPorDias(dias);
@@ -959,7 +971,8 @@ const CapturaRevisiones = () => {
       (!filtroAlmacen || revision.almacen === filtroAlmacen) &&
       (!filtroArea || revision.areaSolicita === filtroArea) &&
       (!filtroQuienRealiza || revision.quienRealiza === filtroQuienRealiza) &&
-      (!filtroEstatus || revision.estatus === filtroEstatus)
+      (!filtroEstatus || revision.estatus === filtroEstatus) &&
+      (!filtroTitulo || normalizarTexto(revision.titulo).includes(normalizarTexto(filtroTitulo)))
     );
   });
 
@@ -1643,84 +1656,123 @@ if (mesSeleccionadoTopAlmacenes) {
               <>
                 <div className="row mb-4" data-tab="tabla">
                   <div className="col-12">
-                    <div className="card bg-light">
+                    <div className="card bg-light border-0 shadow-sm">
                       <div className="card-body">
-                        <h6 className="card-title mb-3">
-                          <i className="fas fa-filter me-2"></i>
-                          Filtros
-                        </h6>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                          <h6 className="card-title mb-0 text-primary">
+                            <i className="fas fa-filter me-2"></i>
+                            Filtros y Búsqueda
+                          </h6>
+                          <button 
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => {
+                              setFiltroColor('');
+                              setFiltroAlmacen('');
+                              setFiltroArea('');
+                              setFiltroQuienRealiza('');
+                              setFiltroEstatus('');
+                              setFiltroTitulo('');
+                            }}
+                          >
+                            <i className="fas fa-eraser me-1"></i>
+                            Limpiar Todo
+                          </button>
+                        </div>
+                        
+                        {/* Barra de búsqueda principal */}
+                        <div className="row mb-4">
+                          <div className="col-12">
+                            <div className="input-group input-group-lg">
+                              <span className="input-group-text bg-primary text-white border-0">
+                                <i className="fas fa-search"></i>
+                              </span>
+                              <input
+                                type="text"
+                                className="form-control border-0 shadow-sm"
+                                style={{fontSize: '16px', fontWeight: '500'}}
+                                placeholder="🔍 Buscar por título..."
+                                value={filtroTitulo}
+                                onChange={(e) => setFiltroTitulo(e.target.value)}
+                              />
+                              {filtroTitulo && (
+                                <span className="input-group-text bg-light border-0">
+                                  <span className="badge bg-primary">{revisionesFiltradas.length} resultados</span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Filtros secundarios */}
                         <div className="row g-3">
                           <div className="col-md-2">
-                            <label className="form-label small">Días en Espera</label>
+                            <label className="form-label small text-muted fw-semibold">Almacen/Sucursal</label>
                             <select 
-                              className="form-select form-select-sm"
-                              value={filtroColor}
-                              onChange={(e) => setFiltroColor(e.target.value)}
+                              className="form-select form-select-sm border-0 shadow-sm"
+                              value={filtroAlmacen}
+                              onChange={(e) => setFiltroAlmacen(e.target.value)}
                             >
-                              <option value="">Todos</option>
-                              <option value="verde">0-10 días (Verde)</option>
-                              <option value="amarillo">11-20 días (Amarillo)</option>
-                              <option value="naranja">21-30 días (Naranja)</option>
-                              <option value="rojo">31+ días (Rojo)</option>
+                              <option value="">📍 Todos</option>
+                              {almacenesUnicos.map(almacen => (
+                                <option key={almacen} value={almacen}>🏢 {almacen}</option>
+                              ))}
                             </select>
                           </div>
                           <div className="col-md-2">
-                            <label className="form-label small">Área que Solicita</label>
+                            <label className="form-label small text-muted fw-semibold">Área que Solicita</label>
                             <select 
-                              className="form-select form-select-sm"
+                              className="form-select form-select-sm border-0 shadow-sm"
                               value={filtroArea}
                               onChange={(e) => setFiltroArea(e.target.value)}
                             >
-                              <option value="">Todas</option>
+                              <option value="">🔧 Todas</option>
                               {areasUnicas.map(area => (
-                                <option key={area} value={area}>{area}</option>
+                                <option key={area} value={area}>⚙️ {area}</option>
                               ))}
                             </select>
                           </div>
                           <div className="col-md-2">
-                            <label className="form-label small">Quién Realiza</label>
+                            <label className="form-label small text-muted fw-semibold">Quién Realiza</label>
                             <select 
-                              className="form-select form-select-sm"
+                              className="form-select form-select-sm border-0 shadow-sm"
                               value={filtroQuienRealiza}
                               onChange={(e) => setFiltroQuienRealiza(e.target.value)}
                             >
-                              <option value="">Todos</option>
+                              <option value="">👤 Todos</option>
                               {quienesRealizanUnicos.map(quien => (
-                                <option key={quien} value={quien}>{quien}</option>
+                                <option key={quien} value={quien}>👥 {quien}</option>
                               ))}
                             </select>
                           </div>
                           <div className="col-md-2">
-                            <label className="form-label small">Estatus</label>
+                            <label className="form-label small text-muted fw-semibold">Estatus</label>
                             <select 
-                              className="form-select form-select-sm"
+                              className="form-select form-select-sm border-0 shadow-sm"
                               value={filtroEstatus}
                               onChange={(e) => setFiltroEstatus(e.target.value)}
                             >
-                              <option value="">Todos</option>
-                              <option value="pendiente">Pendiente</option>
-                              <option value="en_proceso">En Proceso</option>
-                              <option value="enviada">Enviada</option>
-                              <option value="cancelada">Cancelada</option>
-                              <option value="plazo_vencido">P. vencido</option>
-                              <option value="no_realizada">No realizada</option>
+                              <option value="">📊 Todos</option>
+                              <option value="pendiente">⏳ Pendiente</option>
+                              <option value="en_proceso">🔄 En Proceso</option>
+                              <option value="enviada">📤 Enviada</option>
+                              <option value="cancelada">❌ Cancelada</option>
+                              <option value="plazo_vencido">⚠️ P. vencido</option>
+                              <option value="no_realizada">🚫 No realizada</option>
                             </select>
                           </div>
                           <div className="col-md-2">
-                            <label className="form-label small">&nbsp;</label>
-                            <button 
-                              className="btn btn-outline-secondary btn-sm d-block w-100"
-                              onClick={() => {
-                                setFiltroColor('');
-                                setFiltroAlmacen('');
-                                setFiltroArea('');
-                                setFiltroQuienRealiza('');
-                                setFiltroEstatus('');
-                              }}
+                            <label className="form-label small text-muted fw-semibold">Días en Espera</label>
+                            <select 
+                              className="form-select form-select-sm border-0 shadow-sm"
+                              value={filtroColor}
+                              onChange={(e) => setFiltroColor(e.target.value)}
                             >
-                              <i className="fas fa-times me-1"></i>
-                              Limpiar
-                            </button>
+                              <option value="">📅 Todos</option>
+                              <option value="verde">🟢 0-10 días (Verde)</option>
+                              <option value="amarillo">🟡 11-20 días (Amarillo)</option>
+                              <option value="naranja">🟠 21-30 días (Naranja)</option>
+                              <option value="rojo">🔴 31+ días (Rojo)</option>
+                            </select>
                           </div>
                         </div>
                       </div>

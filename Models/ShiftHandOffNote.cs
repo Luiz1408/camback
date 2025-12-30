@@ -19,21 +19,15 @@ namespace ExcelProcessorApi.Models
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;
 
-        [MaxLength(50)]
-        public string Status { get; set; } = "Pendiente";
-
         [MaxLength(20)]
-        public string Type { get; set; } = "informativo"; // "informativo" o "seguimiento"
-
-        [MaxLength(20)]
-        public string Priority { get; set; } = "Media"; // "Alta", "Media", "Baja"
+        public string Type { get; set; } = "informativo";
 
         public int? AssignedCoordinatorId { get; set; }
 
-        // public int? DeliveringUserId { get; set; }
-        //
-        // [ForeignKey(nameof(DeliveringUserId))]
-        // public User? DeliveringUser { get; set; }
+        public int? DeliveringUserId { get; set; }
+
+        [ForeignKey(nameof(DeliveringUserId))]
+        public User? DeliveringUser { get; set; }
 
         [ForeignKey(nameof(AssignedCoordinatorId))]
         public User? AssignedCoordinator { get; set; }

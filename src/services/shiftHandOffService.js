@@ -14,7 +14,7 @@ export const getShiftHandOffNotes = async () => {
 export const createShiftHandOffNote = async (noteData) => {
   try {
     const response = await api.post('/ShiftHandOff', noteData);
-    return response.data.note;
+    return response.data; // El backend retorna la nota directamente, no dentro de un objeto 'note'
   } catch (error) {
     throw new Error(`Error al crear nota: ${error.message}`);
   }
@@ -24,7 +24,7 @@ export const createShiftHandOffNote = async (noteData) => {
 export const updateShiftHandOffNote = async (id, noteData) => {
   try {
     const response = await api.put(`/ShiftHandOff/${id}`, noteData);
-    return response.data.note;
+    return response.data; // El backend retorna la nota directamente, no dentro de un objeto 'note'
   } catch (error) {
     throw new Error(`Error al actualizar nota: ${error.message}`);
   }

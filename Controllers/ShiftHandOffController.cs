@@ -10,8 +10,6 @@ namespace ExcelProcessorApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // AUTORIZACIÓN DESHABILITADA TEMPORALMENTE: reactivar cuando el frontend emita roles válidos
-    // [Authorize(Roles = $"{RoleNames.Administrator},{RoleNames.Coordinator}")]
     public class ShiftHandOffController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -29,6 +27,8 @@ namespace ExcelProcessorApi.Controllers
                 var notes = await _context.ShiftHandOffNotes
                     .Include(n => n.CreatedByUser)
                     .Include(n => n.FinalizedByUser)
+                    .Include(n => n.DeliveringUser)
+                    .Include(n => n.AssignedCoordinator)
                     .Include(n => n.Acknowledgements)
                         .ThenInclude(a => a.CoordinatorUser)
                     .OrderByDescending(n => n.CreatedAt)
@@ -48,26 +48,37 @@ namespace ExcelProcessorApi.Controllers
         {
             try
             {
-                var currentUser = await GetCurrentUserAsync();
-                if (currentUser == null)
-                {
-                    // Temporal: permitir creación sin autenticación para pruebas
-                    currentUser = new User { Id = 1, Username = "test" };
-                }
+                var currentUserId = 1;
 
                 var note = new ShiftHandOffNote
                 {
                     Title = dto?.Title?.Trim() ?? "Entrega de turno",
                     Description = dto?.Description?.Trim() ?? "",
-                    Status = string.IsNullOrWhiteSpace(dto?.Status) ? "Pendiente" : dto.Status.Trim(),
                     Type = string.IsNullOrWhiteSpace(dto?.Type) ? "informativo" : dto.Type.Trim(),
-                    Priority = string.IsNullOrWhiteSpace(dto?.Priority) ? "Media" : dto.Priority.Trim(),
                     AssignedCoordinatorId = dto?.AssignedCoordinatorId,
-                    CreatedByUserId = currentUser.Id,
+                    CreatedByUserId = currentUserId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     Acknowledgements = new List<ShiftHandOffAcknowledgement>()
                 };
+
+                if (dto?.DeliveringUserId.HasValue == true)
+                {
+                    var deliveringUser = await _context.Users.FindAsync(dto.DeliveringUserId.Value);
+                    if (deliveringUser != null)
+                    {
+                        note.DeliveringUserId = dto.DeliveringUserId.Value;
+                    }
+                }
+
+                if (dto?.AssignedCoordinatorId.HasValue == true)
+                {
+                    var coordinator = await _context.Users.FindAsync(dto.AssignedCoordinatorId.Value);
+                    if (coordinator == null)
+                    {
+                        note.AssignedCoordinatorId = null;
+                    }
+                }
 
                 _context.ShiftHandOffNotes.Add(note);
                 await _context.SaveChangesAsync();
@@ -75,16 +86,19 @@ namespace ExcelProcessorApi.Controllers
                 var createdNote = await _context.ShiftHandOffNotes
                     .Include(n => n.CreatedByUser)
                     .Include(n => n.FinalizedByUser)
+                    .Include(n => n.DeliveringUser)
+                    .Include(n => n.AssignedCoordinator)
                     .Include(n => n.Acknowledgements)
                         .ThenInclude(a => a.CoordinatorUser)
                     .FirstAsync(n => n.Id == note.Id);
 
-                return Ok(new { note = MapNoteToResponse(createdNote) });
+                return Ok(MapNoteToResponse(createdNote));
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error en CreateNote: {ex.Message}");
-                return StatusCode(500, new { message = "Error al crear nota" });
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "Error al crear nota", error = ex.Message });
             }
         }
 
@@ -117,40 +131,6 @@ namespace ExcelProcessorApi.Controllers
             if (!string.IsNullOrWhiteSpace(dto.Type))
             {
                 note.Type = string.IsNullOrWhiteSpace(dto.Type) ? "informativo" : dto.Type.Trim();
-            }
-
-            if (dto.Priority != null)
-            {
-                note.Priority = string.IsNullOrWhiteSpace(dto.Priority) ? "Media" : dto.Priority.Trim();
-            }
-
-            if (!string.IsNullOrWhiteSpace(dto.Status))
-            {
-                var trimmedStatus = dto.Status.Trim();
-                note.Status = trimmedStatus;
-
-                if (dto.FinalizedAt != null && dto.FinalizedByUserId.HasValue)
-                {
-                    if (DateTime.TryParse(dto.FinalizedAt, out DateTime parsedDate))
-                    {
-                        note.FinalizedAt = parsedDate;
-                    }
-                    else
-                    {
-                        note.FinalizedAt = DateTime.UtcNow;
-                    }
-                    note.FinalizedByUserId = dto.FinalizedByUserId.Value;
-                }
-                else if (trimmedStatus == "Completado" || trimmedStatus == "Cancelado")
-                {
-                    note.FinalizedByUserId = currentUser.Id;
-                    note.FinalizedAt = DateTime.UtcNow;
-                }
-                else
-                {
-                    note.FinalizedByUserId = null;
-                    note.FinalizedAt = null;
-                }
             }
 
             if (dto.AssignedCoordinatorId.HasValue)
@@ -294,10 +274,9 @@ namespace ExcelProcessorApi.Controllers
                 Id = note.Id,
                 Title = note.Title,
                 Description = note.Description,
-                Status = note.Status,
                 Type = note.Type,
-                Priority = note.Priority,
                 AssignedCoordinatorId = note.AssignedCoordinatorId,
+                DeliveringUserId = note.DeliveringUserId,
                 CreatedAt = EnsureUtc(note.CreatedAt),
                 UpdatedAt = EnsureUtc(note.UpdatedAt),
                 FinalizedAt = EnsureUtc(note.FinalizedAt),
@@ -316,6 +295,22 @@ namespace ExcelProcessorApi.Controllers
                         note.CreatedByUser.Id,
                         FullName = ($"{note.CreatedByUser.FirstName} {note.CreatedByUser.LastName}").Trim(),
                         note.CreatedByUser.Username
+                    }
+                    : null,
+                DeliveringUser = note.DeliveringUser != null
+                    ? new
+                    {
+                        note.DeliveringUser.Id,
+                        FullName = ($"{note.DeliveringUser.FirstName} {note.DeliveringUser.LastName}").Trim(),
+                        note.DeliveringUser.Username
+                    }
+                    : null,
+                AssignedCoordinator = note.AssignedCoordinator != null
+                    ? new
+                    {
+                        note.AssignedCoordinator.Id,
+                        FullName = ($"{note.AssignedCoordinator.FirstName} {note.AssignedCoordinator.LastName}").Trim(),
+                        note.AssignedCoordinator.Username
                     }
                     : null,
                 acknowledgements = note.Acknowledgements.Select(a => new
