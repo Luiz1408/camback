@@ -7,9 +7,8 @@ import Dashboard from './pages/Dashboard';
 import RevisionesEntregadas from './pages/RevisionesEntregadas';
 import CapturaRevisiones from './pages/CapturaRevisiones';
 import Charts from './pages/Charts';
-import EntregaTurno from './pages/EntregaTurno';
-import PlaneacionTecnica from './pages/PlaneacionTecnica';
 import EntregaTurnoMonitoreo from './pages/EntregaTurnoMonitoreo';
+import PlaneacionTecnica from './pages/PlaneacionTecnica';
 import AdminCatalogos from './components/AdminCatalogos';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -46,14 +45,6 @@ function App() {
           />
           <Route
             path="/entrega-turno"
-            element={
-              <PrivateRoute>
-                <EntregaTurno />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/entrega-turno-monitoreo"
             element={
               <PrivateRoute>
                 <EntregaTurnoMonitoreo />
