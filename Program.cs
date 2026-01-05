@@ -12,19 +12,43 @@ using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==========================
+// EPPlus
+// ==========================
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-// Add services to the container.
+// ==========================
+// Database
+// ==========================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Agrega esto después de AddDbContext
+// Services
 builder.Services.AddScoped<JwtService>();
 
-// JWT Configuration
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]!);
+// ==========================
+// JWT CONFIGURATION (SAFE)
+// ==========================
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
 
+var jwtSecret = jwtSection.GetValue<string>("Secret");
+var jwtIssuer = jwtSection.GetValue<string>("Issuer");
+var jwtAudience = jwtSection.GetValue<string>("Audience");
+
+if (string.IsNullOrWhiteSpace(jwtSecret))
+    throw new Exception("❌ JwtSettings:Secret no está configurado");
+
+if (string.IsNullOrWhiteSpace(jwtIssuer))
+    throw new Exception("❌ JwtSettings:Issuer no está configurado");
+
+if (string.IsNullOrWhiteSpace(jwtAudience))
+    throw new Exception("❌ JwtSettings:Audience no está configurado");
+
+var key = Encoding.UTF8.GetBytes(jwtSecret);
+
+// ==========================
+// Authentication
+// ==========================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,14 +58,15 @@ builder.Services.AddAuthentication(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
+        ValidIssuer = jwtIssuer,
         ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
+        ValidAudience = jwtAudience,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
@@ -54,19 +79,15 @@ builder.Services.AddAuthentication(options =>
 
             if (!string.IsNullOrWhiteSpace(authHeader))
             {
-                var header = authHeader.Trim();
+                var token = authHeader.Trim();
 
-                if (header.Length >= 2 && header[0] == '"' && header[^1] == '"')
-                {
-                    header = header.Substring(1, header.Length - 2).Trim();
-                }
+                if (token.StartsWith("\"") && token.EndsWith("\""))
+                    token = token[1..^1];
 
-                if (header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                {
-                    header = header.Substring("Bearer ".Length).Trim();
-                }
+                if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    token = token["Bearer ".Length..];
 
-                context.Token = header;
+                context.Token = token;
             }
 
             return Task.CompletedTask;
@@ -74,30 +95,39 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// ==========================
 // CORS
+// ==========================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
+// ==========================
 // Controllers
+// ==========================
 builder.Services.AddControllers();
 
+// ==========================
 // Swagger
+// ==========================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExcelProcessor API", Version = "v1" });
-    
-    // Configuración de autenticación JWT en Swagger
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "ExcelProcessor API",
+        Version = "v1"
+    });
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Description = "Authorization: Bearer {token}",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -115,11 +145,7 @@ builder.Services.AddSwaggerGen(c =>
     c.MapType<IEnumerable<IFormFile>>(() => new OpenApiSchema
     {
         Type = "array",
-        Items = new OpenApiSchema
-        {
-            Type = "string",
-            Format = "binary"
-        }
+        Items = new OpenApiSchema { Type = "string", Format = "binary" }
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -140,103 +166,63 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// ==========================
+// Database Seed
+// ==========================
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
     try
     {
-        // Crear roles si no existen
         if (!dbContext.Roles.Any(r => r.Name == RoleNames.Technician))
-        {
-            dbContext.Roles.Add(new Role
-            {
-                Name = RoleNames.Technician,
-                Description = "Puede registrar y dar seguimiento a actividades técnicas"
-            });
-        }
+            dbContext.Roles.Add(new Role { Name = RoleNames.Technician });
 
         if (!dbContext.Roles.Any(r => r.Name == RoleNames.Administrator))
-        {
-            dbContext.Roles.Add(new Role
-            {
-                Name = RoleNames.Administrator,
-                Description = "Acceso completo a todas las funcionalidades"
-            });
-        }
+            dbContext.Roles.Add(new Role { Name = RoleNames.Administrator });
 
         if (!dbContext.Roles.Any(r => r.Name == RoleNames.Coordinator))
-        {
-            dbContext.Roles.Add(new Role
-            {
-                Name = RoleNames.Coordinator,
-                Description = "Puede coordinar operaciones y gestionar usuarios"
-            });
-        }
+            dbContext.Roles.Add(new Role { Name = RoleNames.Coordinator });
 
         if (!dbContext.Roles.Any(r => r.Name == RoleNames.Monitorista))
-        {
-            dbContext.Roles.Add(new Role
-            {
-                Name = RoleNames.Monitorista,
-                Description = "Puede consultar información y dar seguimiento"
-            });
-        }
+            dbContext.Roles.Add(new Role { Name = RoleNames.Monitorista });
 
-        // Crear usuario admin si no existe
         if (!dbContext.Users.Any(u => u.Username == "admin"))
         {
-            var adminRole = dbContext.Roles.FirstOrDefault(r => r.Name == RoleNames.Administrator);
-            if (adminRole != null)
+            var adminRole = dbContext.Roles.First(r => r.Name == RoleNames.Administrator);
+
+            dbContext.Users.Add(new User
             {
-                var adminUser = new User
-                {
-                    Username = "admin",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
-                    RoleId = adminRole.Id,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-                };
-                dbContext.Users.Add(adminUser);
-            }
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                RoleId = adminRole.Id,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            });
         }
 
         dbContext.SaveChanges();
         Console.WriteLine("✅ Base de datos inicializada correctamente");
-        Console.WriteLine("🔑 Credenciales del administrador:");
-        Console.WriteLine("   Usuario: admin");
-        Console.WriteLine("   Contraseña: Admin123!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Error inicializando la base de datos: {ex.Message}");
+        Console.WriteLine($"❌ Error inicializando DB: {ex.Message}");
     }
 }
 
-// Configure the HTTP request pipeline.
+// ==========================
+// Middleware
+// ==========================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExcelProcessor API v1"));
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
-// Configurar archivos estáticos
 app.UseStaticFiles();
-
-// Configurar archivos estáticos personalizados para uploads
-var staticFilesOptions = new StaticFileOptions
-{
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
-    RequestPath = "/uploads"
-};
-app.UseStaticFiles(staticFilesOptions);
-
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
