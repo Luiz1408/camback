@@ -23,11 +23,13 @@ ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// ==========================
 // Services
+// ==========================
 builder.Services.AddScoped<JwtService>();
 
 // ==========================
-// JWT CONFIGURATION (SAFE)
+// JWT CONFIGURATION
 // ==========================
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 
@@ -211,18 +213,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ==========================
-// Middleware
+// Middleware (ORDEN CORRECTO)
 // ==========================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();
